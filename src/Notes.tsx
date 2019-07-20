@@ -39,6 +39,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
   const [notes, setNotes] = useState<Note[] | null>(null);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [textareaValue, setTextareavalue] = useState<string>("");
+  const hasNotes = useMemo(() => notes && notes.length > 0, [notes]);
 
   const sortedNotes = useMemo(() => {
     if (!notes) return null;
@@ -225,7 +226,23 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
               placeholder="Type your note here..."
             />
           ) : (
-            <p className="text-muted notes__empty">Select a note</p>
+            <div className="notes__empty h-100 d-flex align-items-center justify-content-center">
+              <div className="text-center">
+                <p className="display-3 text-muted">
+                  {hasNotes ? "Select a note" : "Start use notes"}
+                </p>
+
+                {!hasNotes && (
+                  <button
+                    onClick={handleNewClick}
+                    className="btn btn-primary"
+                    type="button"
+                  >
+                    Create your first note
+                  </button>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </div>
