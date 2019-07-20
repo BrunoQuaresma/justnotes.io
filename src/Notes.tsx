@@ -39,6 +39,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
   const [notes, setNotes] = useState<Note[] | null>(null);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [textareaValue, setTextareavalue] = useState<string>("");
+  const [isCreating, setIsCreating] = useState(false);
   const hasNotes = useMemo(() => notes && notes.length > 0, [notes]);
 
   const sortedNotes = useMemo(() => {
@@ -114,12 +115,14 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
 
   const handleNewClick = useCallback(async () => {
     if (!notes) return;
+    setIsCreating(true);
 
     const newNote: any = await runQuery(CREATE_NOTE);
 
     setNotes(notes.concat(newNote));
     setSelectedNoteId(newNote.ref.id);
     setTextareavalue(newNote.data.content);
+    setIsCreating(false);
     focusTextarea();
   }, [focusTextarea, notes]);
 
@@ -155,8 +158,9 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
           <button
             onClick={handleNewClick}
             className="btn btn-block btn-primary mb-3"
+            disabled={isCreating}
           >
-            New note
+            {isCreating ? "Creating..." : "New note"}
           </button>
 
           {sortedNotes.map(note => (
@@ -237,8 +241,9 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
                     onClick={handleNewClick}
                     className="btn btn-primary"
                     type="button"
+                    disabled={isCreating}
                   >
-                    Create your first note
+                    {isCreating ? "Creating..." : "Create your first note"}
                   </button>
                 )}
               </div>
