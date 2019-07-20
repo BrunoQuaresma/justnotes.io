@@ -201,10 +201,14 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
           ))}
         </div>
 
-        <div className="col-md-8 col-lg-9 p-3">
-          <div className="row px-3 mb-3 justify-content-end">
+        <div className="d-md-flex flex-column col-md-8 col-lg-9 p-3">
+          <div className="row px-3 py-1 mb-3 justify-content-end">
+            <button className="btn btn-sm btn-outline-primary mr-1">
+              Share note
+            </button>
+
             <UncontrolledDropdown>
-              <DropdownToggle className="my-1" color="light" size="sm" caret>
+              <DropdownToggle outline color="secondary" size="sm" caret>
                 My account
               </DropdownToggle>
               <DropdownMenu right>
