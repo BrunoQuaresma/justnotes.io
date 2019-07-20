@@ -8,7 +8,7 @@ type Credentials = {
 
 export const signUp = async ({ email, password }: Credentials) => {
   const client = new faunadb.Client({
-    secret: "fnADTjTHCzACBxluxCcuz9vOZqD345VUcd9-BTF9"
+    secret: "fnADTyWD2PACB---mv4QI7dYFHl_naRRH9dPAgKw"
   });
 
   const session: any = await client.query(
@@ -61,6 +61,10 @@ type AuthSession = {
 
 export const setSession = (session: AuthSession) => {
   cookies.set("session", session);
+};
+
+export const getSession = (): null | AuthSession => {
+  return cookies.getJSON("session");
 };
 
 export const logout = () => {

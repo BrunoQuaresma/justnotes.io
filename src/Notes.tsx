@@ -15,7 +15,7 @@ import {
 } from "reactstrap";
 import { runQuery } from "./database";
 import {
-  GET_ALL_NOTES,
+  GET_USER_NOTES,
   UPDATE_NOTE_CONTENT,
   CREATE_NOTE,
   DELETE_NOTE
@@ -46,7 +46,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
   }, [notes]);
 
   useEffect(() => {
-    runQuery(GET_ALL_NOTES).then((result: any) => {
+    runQuery(GET_USER_NOTES).then((result: any) => {
       setNotes(result.data);
     });
   }, []);
@@ -150,7 +150,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
   return (
     <div className="notes container-fluid">
       <div className="row">
-        <div className="scrollable-y col-md-4 bg-light p-3">
+        <div className="scrollable-y col-md-4 col-lg-3 bg-light p-3">
           <button
             onClick={handleNewClick}
             className="btn btn-block btn-primary mb-3"
@@ -201,7 +201,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
           ))}
         </div>
 
-        <div className="col-md-8 p-3">
+        <div className="col-md-8 col-lg-9 p-3">
           <div className="row px-3 mb-3 justify-content-end">
             <UncontrolledDropdown>
               <DropdownToggle className="my-1" color="light" size="sm" caret>

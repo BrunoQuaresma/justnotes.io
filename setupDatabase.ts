@@ -32,6 +32,14 @@ const setup = async () => {
       source: q.Collection("Notes")
     })
   );
+
+  await client.query(
+    q.CreateIndex({
+      name: "notes_by_owner",
+      terms: [{ field: ["data", "owner"] }],
+      source: q.Collection("Notes")
+    })
+  );
 };
 
 setup();
