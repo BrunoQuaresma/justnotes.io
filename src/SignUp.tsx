@@ -1,13 +1,13 @@
 import React from "react";
 import { RouteComponentProps, Link } from "@reach/router";
 
-const SignIn: React.FC<RouteComponentProps> = () => {
+const SignUp: React.FC<RouteComponentProps> = () => {
   return (
     <div className="container h-100 d-flex align-items-center">
       <div className="row">
         <div className="col-md-8">
           <h1 className="display-2 font-weight-bold">
-            Welcome back to your notes app.{" "}
+            Welcome to your notes app.{" "}
             <span className="text-muted font-weight-normal">
               Just simple, just notes.
             </span>
@@ -25,10 +25,13 @@ const SignIn: React.FC<RouteComponentProps> = () => {
           </div>
 
           <div className="form-group">
-            <button className="btn btn-dark btn-block">Login</button>
-            <Link to="/register" className="btn btn-light btn-block">
-              Register
-            </Link>
+            <label htmlFor="">Confirm password</label>
+            <input type="text" className="form-control" />
+          </div>
+
+          <div className="form-group">
+            <button className="btn btn-dark btn-block">Register</button>
+            <Link to="/" className="btn btn-light btn-block">Login</Link>
           </div>
         </div>
       </div>
@@ -36,4 +39,4 @@ const SignIn: React.FC<RouteComponentProps> = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;
