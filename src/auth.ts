@@ -1,17 +1,17 @@
 import faunadb, { query as q } from "faunadb";
 import cookies from "js-cookie";
 
-type SignUpValues = {
+type Credentials = {
   email: string;
   password: string;
 };
 
-export const signUp = async ({ email, password }: SignUpValues) => {
+export const signUp = async ({ email, password }: Credentials) => {
   const client = new faunadb.Client({
     secret: "fnADTjTHCzACBxluxCcuz9vOZqD345VUcd9-BTF9"
   });
 
-  const credentials: any = await client.query(
+  const session: any = await client.query(
     q.Let(
       {
         user: q.Create(q.Collection("Users"), {
@@ -27,20 +27,20 @@ export const signUp = async ({ email, password }: SignUpValues) => {
     )
   );
 
-  setCredentials(credentials);
+  setSession(session);
 
-  return credentials;
+  return session;
 };
 
-type Credentials = {
+type AuthSession = {
   id: string;
   secret: string;
 };
 
-export const setCredentials = (credentials: Credentials) => {
-  cookies.set("credentials", credentials);
+export const setSession = (session: AuthSession) => {
+  cookies.set("session", session);
 };
 
 export const logout = () => {
-  cookies.remove("credentials");
+  cookies.remove("session");
 };
