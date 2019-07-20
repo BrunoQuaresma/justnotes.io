@@ -40,3 +40,7 @@ type Credentials = {
 export const setCredentials = (credentials: Credentials) => {
   cookies.set("credentials", credentials);
 };
+
+export const logout = () => {
+  cookies.remove("credentials");
+};

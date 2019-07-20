@@ -2,7 +2,7 @@ html,
 body,
 #root,
 .notes,
-.notes .row,
+.notes > .row,
 #root > div[role="group"] {
   height: 100%;
 }

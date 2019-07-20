@@ -20,6 +20,7 @@ import {
   CREATE_NOTE,
   DELETE_NOTE
 } from "./queries";
+import { logout } from "./auth";
 import "./index.css";
 import { RouteComponentProps } from "@reach/router";
 
@@ -33,7 +34,7 @@ type Note = {
   };
 };
 
-const Notes: React.FC<RouteComponentProps> = () => {
+const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [notes, setNotes] = useState<Note[] | null>(null);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
@@ -139,6 +140,11 @@ const Notes: React.FC<RouteComponentProps> = () => {
     [notes, selectedNoteId]
   );
 
+  const handleLogout = useCallback(() => {
+    logout();
+    navigate && navigate("/");
+  }, [navigate]);
+
   if (!sortedNotes) return <div>Loading...</div>;
 
   return (
@@ -196,6 +202,17 @@ const Notes: React.FC<RouteComponentProps> = () => {
         </div>
 
         <div className="col-md-8 p-3">
+          <div className="row px-3 mb-3 justify-content-end">
+            <UncontrolledDropdown>
+              <DropdownToggle className="my-1" color="light" size="sm" caret>
+                My account
+              </DropdownToggle>
+              <DropdownMenu right>
+                <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
+              </DropdownMenu>
+            </UncontrolledDropdown>
+          </div>
+
           {selectedNoteId ? (
             <textarea
               ref={textAreaRef}
