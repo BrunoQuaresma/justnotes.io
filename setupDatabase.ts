@@ -7,6 +7,21 @@ const client = new faunadb.Client({
 const setup = async () => {
   await client.query(
     q.CreateCollection({
+      name: "Users"
+    })
+  );
+
+  await client.query(
+    q.CreateIndex({
+      name: "user_by_email",
+      terms: [{ field: ["data", "email"] }],
+      source: q.Collection("Users"),
+      unique: true
+    })
+  );
+
+  await client.query(
+    q.CreateCollection({
       name: "Notes"
     })
   );
