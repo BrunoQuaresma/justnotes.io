@@ -2,7 +2,7 @@ import faunadb, { query as q } from 'faunadb'
 import cookies from 'js-cookie'
 
 const client = new faunadb.Client({
-  secret: String(process.env.REACT_APP_FAUNA_AUTH_KEY)
+  secret: String(process.env.REACT_APP_FAUNADB_AUTH_KEY)
 })
 
 type Credentials = {
