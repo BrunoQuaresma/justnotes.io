@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { RouteComponentProps, Link } from '@reach/router'
+import ReactGA from 'react-ga'
 import useForm from '../utils/useForm'
 import { signUp } from './authService'
 
@@ -22,7 +23,13 @@ const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
   const registerUser = useCallback(
     async (values: SignUpValues) => {
       setIsLoading(true)
+
       await signUp(values)
+
+      ReactGA.event({
+        category: 'User',
+        action: 'Sign Up'
+      })
       navigate && navigate('/notes')
     },
     [navigate]

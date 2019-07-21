@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { RouteComponentProps, Link } from '@reach/router'
+import ReactGA from 'react-ga'
 import useForm from '../utils/useForm'
 import { signIn } from './authService'
 
@@ -20,7 +21,13 @@ const SignIn: React.FC<RouteComponentProps> = ({ navigate }) => {
   const loginUser = useCallback(
     async (values: SignInValues) => {
       setIsLoading(true)
+
       await signIn(values)
+
+      ReactGA.event({
+        category: 'User',
+        action: 'Sign In'
+      })
       navigate && navigate('/notes')
     },
     [navigate]

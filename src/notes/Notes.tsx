@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import faunadb from 'faunadb'
+import ReactGA from 'react-ga'
 import { format } from 'timeago.js'
 import {
   UncontrolledDropdown,
@@ -100,6 +101,10 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
         window.clearInterval(timeouts[selectedNoteId])
         timeouts[selectedNoteId] = window.setTimeout(() => {
           updateNoteContent(selectedNoteId, updatedContent)
+          ReactGA.event({
+            category: 'Note',
+            action: 'Update'
+          })
         }, 1000)
       }
     },
@@ -111,6 +116,10 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
     setIsCreating(true)
 
     const newNote: any = await createEmptyNote()
+    ReactGA.event({
+      category: 'Note',
+      action: 'Create'
+    })
 
     setNotes(notes.concat(newNote))
     setSelectedNoteId(newNote.ref.id)
@@ -142,6 +151,10 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
     if (!notes || !noteIdToDelete) return
 
     await deleteNote(noteIdToDelete)
+    ReactGA.event({
+      category: 'Note',
+      action: 'Delete'
+    })
 
     if (selectedNoteId === noteIdToDelete) setSelectedNoteId(null)
     setNotes(notes.filter(noteFilter => noteFilter.ref.id !== noteIdToDelete))
@@ -152,6 +165,10 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
 
   const handleLogout = useCallback(() => {
     logout()
+    ReactGA.event({
+      category: 'User',
+      action: 'Logout'
+    })
     navigate && navigate('/')
   }, [navigate])
 

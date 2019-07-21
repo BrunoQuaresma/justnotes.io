@@ -1,7 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import ReactGA from 'react-ga'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
+
+const { REACT_APP_GA_ID } = process.env
+
+if (REACT_APP_GA_ID) ReactGA.initialize(REACT_APP_GA_ID)
 
 ReactDOM.render(<App />, document.getElementById('root'))
 
