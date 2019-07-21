@@ -107,7 +107,10 @@ const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
             ❤️
           </span>
           Open Source.
-          <a href="" className="ml-1">
+          <a
+            href="https://github.com/BrunoQuaresma/justnotes.io"
+            className="ml-1"
+          >
             Check here the source code.
           </a>
         </p>
