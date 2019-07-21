@@ -9,16 +9,14 @@ import {
   Modal,
   ModalBody
 } from 'reactstrap'
-import { runQuery } from './database'
-import {
-  GET_USER_NOTES,
-  UPDATE_NOTE_CONTENT,
-  CREATE_NOTE,
-  DELETE_NOTE
-} from './queries'
-import { logout } from '../auth/authService'
-import './index.css'
 import { RouteComponentProps } from '@reach/router'
+import { logout } from '../auth/authService'
+import {
+  getUserNotes,
+  updateNoteContent,
+  createEmptyNote,
+  deleteNote
+} from './notesService'
 
 let timeouts: { [key: string]: number } = {}
 
@@ -47,7 +45,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
   }, [notes])
 
   useEffect(() => {
-    runQuery(GET_USER_NOTES).then((result: any) => {
+    getUserNotes().then((result: any) => {
       setNotes(result.data)
     })
   }, [])
@@ -67,7 +65,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
     [focusTextarea]
   )
 
-  const updateNoteContent = useCallback(
+  const updateNoteState = useCallback(
     (noteId: string, updatedContent: string) => {
       if (!notes) return
 
@@ -90,10 +88,6 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
     [notes]
   )
 
-  const saveNoteContent = useCallback((noteId: string, content: string) => {
-    runQuery(UPDATE_NOTE_CONTENT(noteId, content))
-  }, [])
-
   const handleTextChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       const updatedContent = event.currentTarget.value
@@ -101,22 +95,22 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
       setTextareavalue(updatedContent)
 
       if (selectedNoteId) {
-        updateNoteContent(selectedNoteId, updatedContent)
+        updateNoteState(selectedNoteId, updatedContent)
 
         window.clearInterval(timeouts[selectedNoteId])
         timeouts[selectedNoteId] = window.setTimeout(() => {
-          saveNoteContent(selectedNoteId, updatedContent)
+          updateNoteContent(selectedNoteId, updatedContent)
         }, 1000)
       }
     },
-    [saveNoteContent, selectedNoteId, updateNoteContent]
+    [selectedNoteId, updateNoteState]
   )
 
   const handleNewClick = useCallback(async () => {
     if (!notes) return
     setIsCreating(true)
 
-    const newNote: any = await runQuery(CREATE_NOTE)
+    const newNote: any = await createEmptyNote()
 
     setNotes(notes.concat(newNote))
     setSelectedNoteId(newNote.ref.id)
@@ -147,7 +141,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
 
     if (!notes || !noteIdToDelete) return
 
-    await runQuery(DELETE_NOTE(noteIdToDelete))
+    await deleteNote(noteIdToDelete)
 
     if (selectedNoteId === noteIdToDelete) setSelectedNoteId(null)
     setNotes(notes.filter(noteFilter => noteFilter.ref.id !== noteIdToDelete))
