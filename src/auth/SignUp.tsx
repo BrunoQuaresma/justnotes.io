@@ -29,8 +29,17 @@ const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
   )
 
   return (
-    <div className="container h-100 d-flex align-items-center">
-      <div className="row">
+    <div className="container h-100">
+      <div className="row py-3 py-lg-5">
+        <div className="col">
+          <span className="lead">
+            <span className="font-weight-bold">justnotes</span>
+            <span className="text-muted">.io</span>
+          </span>
+        </div>
+      </div>
+
+      <div className="row py-3 py-lg-5">
         <div className="col-lg-8">
           <h1 className="display-2 font-weight-bold">
             Welcome to your notes app.{' '}
@@ -83,6 +92,19 @@ const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
           </form>
         </div>
       </div>
+
+      <footer className="py-4">
+        <p>
+          We{' '}
+          <span role="img" aria-label="heart">
+            ❤️
+          </span>
+          Open Source.
+          <a href="" className="ml-1">
+            Check here the source code.
+          </a>
+        </p>
+      </footer>
     </div>
   )
 }
