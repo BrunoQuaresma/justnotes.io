@@ -1,7 +1,7 @@
 import faunadb, { query as q } from "faunadb";
 
 const client = new faunadb.Client({
-  secret: "fnADTjTHCzACBxluxCcuz9vOZqD345VUcd9-BTF9"
+  secret: process.env.FAUNA_ADMIN_KEY
 });
 
 const setup = async () => {

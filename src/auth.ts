@@ -8,7 +8,7 @@ type Credentials = {
 
 export const signUp = async ({ email, password }: Credentials) => {
   const client = new faunadb.Client({
-    secret: "fnADTyWD2PACB---mv4QI7dYFHl_naRRH9dPAgKw"
+    secret: String(process.env.REACT_APP_FAUNA_AUTH_KEY)
   });
 
   const session: any = await client.query(
@@ -34,7 +34,7 @@ export const signUp = async ({ email, password }: Credentials) => {
 
 export const signIn = async ({ email, password }: Credentials) => {
   const client = new faunadb.Client({
-    secret: "fnADTjTHCzACBxluxCcuz9vOZqD345VUcd9-BTF9"
+    secret: String(process.env.REACT_APP_FAUNA_AUTH_KEY)
   });
 
   const session: any = await client.query(
