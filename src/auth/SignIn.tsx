@@ -1,28 +1,26 @@
-import React, { useCallback, useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { RouteComponentProps, Link } from '@reach/router'
-import useForm from './useForm'
-import { signUp } from './auth'
+import useForm from '../utils/useForm'
+import { signIn } from './authService'
 
-type SignUpValues = {
+type SignInValues = {
   email: string
   password: string
-  confirmPassword: string
 }
 
 const initialFormValues = {
   email: '',
-  password: '',
-  confirmPassword: ''
+  password: ''
 }
 
-const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
+const SignIn: React.FC<RouteComponentProps> = ({ navigate }) => {
   const [isLoading, setIsLoading] = useState(false)
-  const { handleSubmit, fieldProps } = useForm<SignUpValues>(initialFormValues)
+  const { handleSubmit, fieldProps } = useForm<SignInValues>(initialFormValues)
 
-  const registerUser = useCallback(
-    async (values: SignUpValues) => {
+  const loginUser = useCallback(
+    async (values: SignInValues) => {
       setIsLoading(true)
-      await signUp(values)
+      await signIn(values)
       navigate && navigate('/notes')
     },
     [navigate]
@@ -33,19 +31,19 @@ const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
       <div className="row">
         <div className="col-lg-8">
           <h1 className="display-2 font-weight-bold">
-            Welcome to your notes app.{' '}
+            Welcome back to your notes app.{' '}
             <span className="text-muted font-weight-normal">
               Just simple, just notes.
             </span>
           </h1>
         </div>
         <div className="col-lg-4">
-          <form onSubmit={handleSubmit(registerUser)}>
+          <form onSubmit={handleSubmit(loginUser)}>
             <div className="form-group mt-4">
-              <label htmlFor="">E-mail</label>
+              <label htmlFor="email">E-mail</label>
               <input
-                autoFocus
                 required
+                autoFocus
                 type="email"
                 className="form-control"
                 {...fieldProps('email')}
@@ -53,7 +51,7 @@ const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="">Password</label>
+              <label htmlFor="password">Password</label>
               <input
                 required
                 type="password"
@@ -63,21 +61,11 @@ const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="">Confirm password</label>
-              <input
-                required
-                type="password"
-                className="form-control"
-                {...fieldProps('confirmPassword')}
-              />
-            </div>
-
-            <div className="form-group">
               <button className="btn btn-dark btn-block" disabled={isLoading}>
-                {isLoading ? 'Registering...' : 'Register'}
+                {isLoading ? 'Login...' : 'Login'}
               </button>
-              <Link to="/" className="btn btn-light btn-block">
-                Login
+              <Link to="/register" className="btn btn-light btn-block">
+                Register
               </Link>
             </div>
           </form>
@@ -87,4 +75,4 @@ const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
   )
 }
 
-export default SignUp
+export default SignIn

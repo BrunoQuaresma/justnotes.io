@@ -16,7 +16,7 @@ import {
   CREATE_NOTE,
   DELETE_NOTE
 } from './queries'
-import { logout } from './auth'
+import { logout } from '../auth/authService'
 import './index.css'
 import { RouteComponentProps } from '@reach/router'
 

@@ -1,5 +1,5 @@
 import faunadb, { query } from 'faunadb'
-import { getSession } from './auth'
+import { getSession } from '../auth/authService'
 
 type QueryFn = (q: typeof query) => faunadb.Expr
 
