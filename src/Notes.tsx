@@ -167,7 +167,12 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
     navigate && navigate("/");
   }, [navigate]);
 
-  if (!sortedNotes) return <div>Loading...</div>;
+  if (!sortedNotes)
+    return (
+      <div className="h-100 w-100 d-flex align-items-center justify-content-center">
+        Loading...
+      </div>
+    );
 
   return (
     <>
