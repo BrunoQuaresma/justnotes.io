@@ -12,7 +12,9 @@
     "@types/react-dom": "16.8.4",
     "@types/reactstrap": "^8.0.1",
     "faunadb": "^2.7.0",
+    "husky": "^3.0.1",
     "js-cookie": "^2.2.0",
+    "lint-staged": "^9.2.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1",
@@ -26,10 +28,34 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "setup": "ts-node -O '{\"module\": \"commonjs\"}' ./setupDatabase.ts"
+    "setup": "ts-node -O '{\"module\": \"commonjs\"}' ./setupDatabase.ts",
+    "format": "prettier-eslint --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "rules": {
+      "semi": [
+        "error",
+        "never"
+      ],
+      "quotes": [
+        "error",
+        "single"
+      ],
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier-eslint --write",
+      "git add"
+    ]
   },
   "browserslist": {
     "production": [
@@ -42,5 +68,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "prettier-eslint-cli": "^5.0.0"
   }
 }

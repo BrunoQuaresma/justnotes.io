@@ -1,12 +1,6 @@
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-  useRef
-} from "react";
-import faunadb from "faunadb";
-import { format } from "timeago.js";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import faunadb from 'faunadb'
+import { format } from 'timeago.js'
 import {
   UncontrolledDropdown,
   DropdownToggle,
@@ -14,68 +8,68 @@ import {
   DropdownItem,
   Modal,
   ModalBody
-} from "reactstrap";
-import { runQuery } from "./database";
+} from 'reactstrap'
+import { runQuery } from './database'
 import {
   GET_USER_NOTES,
   UPDATE_NOTE_CONTENT,
   CREATE_NOTE,
   DELETE_NOTE
-} from "./queries";
-import { logout } from "./auth";
-import "./index.css";
-import { RouteComponentProps } from "@reach/router";
+} from './queries'
+import { logout } from './auth'
+import './index.css'
+import { RouteComponentProps } from '@reach/router'
 
-let timeouts: { [key: string]: number } = {};
+let timeouts: { [key: string]: number } = {}
 
 type Note = {
-  ref: faunadb.values.Ref;
-  ts: number;
+  ref: faunadb.values.Ref
+  ts: number
   data: {
-    content: string;
-  };
-};
+    content: string
+  }
+}
 
 const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [notes, setNotes] = useState<Note[] | null>(null);
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
-  const [textareaValue, setTextareavalue] = useState<string>("");
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null);
-  const hasNotes = useMemo(() => notes && notes.length > 0, [notes]);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null)
+  const [notes, setNotes] = useState<Note[] | null>(null)
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
+  const [textareaValue, setTextareavalue] = useState<string>('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null)
+  const hasNotes = useMemo(() => notes && notes.length > 0, [notes])
 
   const sortedNotes = useMemo(() => {
-    if (!notes) return null;
-    return notes.concat().sort((a, b) => b.ts - a.ts);
-  }, [notes]);
+    if (!notes) return null
+    return notes.concat().sort((a, b) => b.ts - a.ts)
+  }, [notes])
 
   useEffect(() => {
     runQuery(GET_USER_NOTES).then((result: any) => {
-      setNotes(result.data);
-    });
-  }, []);
+      setNotes(result.data)
+    })
+  }, [])
 
   const focusTextarea = useCallback(() => {
     if (textAreaRef.current) {
-      textAreaRef.current.focus();
+      textAreaRef.current.focus()
     }
-  }, []);
+  }, [])
 
   const handleNoteClick = useCallback(
     (note: Note) => {
-      setSelectedNoteId(note.ref.id);
-      setTextareavalue(note.data.content);
-      focusTextarea();
+      setSelectedNoteId(note.ref.id)
+      setTextareavalue(note.data.content)
+      focusTextarea()
     },
     [focusTextarea]
-  );
+  )
 
   const updateNoteContent = useCallback(
     (noteId: string, updatedContent: string) => {
-      if (!notes) return;
+      if (!notes) return
 
       setNotes(
         notes.map(note => {
@@ -86,93 +80,93 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
                 ...note.data,
                 content: updatedContent
               }
-            };
+            }
           }
 
-          return note;
+          return note
         })
-      );
+      )
     },
     [notes]
-  );
+  )
 
   const saveNoteContent = useCallback((noteId: string, content: string) => {
-    runQuery(UPDATE_NOTE_CONTENT(noteId, content));
-  }, []);
+    runQuery(UPDATE_NOTE_CONTENT(noteId, content))
+  }, [])
 
   const handleTextChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const updatedContent = event.currentTarget.value;
+      const updatedContent = event.currentTarget.value
 
-      setTextareavalue(updatedContent);
+      setTextareavalue(updatedContent)
 
       if (selectedNoteId) {
-        updateNoteContent(selectedNoteId, updatedContent);
+        updateNoteContent(selectedNoteId, updatedContent)
 
-        window.clearInterval(timeouts[selectedNoteId]);
+        window.clearInterval(timeouts[selectedNoteId])
         timeouts[selectedNoteId] = window.setTimeout(() => {
-          saveNoteContent(selectedNoteId, updatedContent);
-        }, 1000);
+          saveNoteContent(selectedNoteId, updatedContent)
+        }, 1000)
       }
     },
     [saveNoteContent, selectedNoteId, updateNoteContent]
-  );
+  )
 
   const handleNewClick = useCallback(async () => {
-    if (!notes) return;
-    setIsCreating(true);
+    if (!notes) return
+    setIsCreating(true)
 
-    const newNote: any = await runQuery(CREATE_NOTE);
+    const newNote: any = await runQuery(CREATE_NOTE)
 
-    setNotes(notes.concat(newNote));
-    setSelectedNoteId(newNote.ref.id);
-    setTextareavalue(newNote.data.content);
-    setIsCreating(false);
-    focusTextarea();
-  }, [focusTextarea, notes]);
+    setNotes(notes.concat(newNote))
+    setSelectedNoteId(newNote.ref.id)
+    setTextareavalue(newNote.data.content)
+    setIsCreating(false)
+    focusTextarea()
+  }, [focusTextarea, notes])
 
   const handleDropdownClick = useCallback((event: React.MouseEvent) => {
-    event.stopPropagation();
-  }, []);
+    event.stopPropagation()
+  }, [])
 
   const handleDeleteModalToggle = useCallback(() => {
-    setIsDeleteModalOpen(!isDeleteModalOpen);
-  }, [isDeleteModalOpen]);
+    setIsDeleteModalOpen(!isDeleteModalOpen)
+  }, [isDeleteModalOpen])
 
   const handleNoteDelete = useCallback(
     async (note: Note, event: React.MouseEvent) => {
-      event.stopPropagation();
-      setNoteIdToDelete(note.ref.id);
-      handleDeleteModalToggle();
+      event.stopPropagation()
+      setNoteIdToDelete(note.ref.id)
+      handleDeleteModalToggle()
     },
     [handleDeleteModalToggle]
-  );
+  )
 
   const handleDeleteModalConfirm = useCallback(async () => {
-    setIsDeleting(true);
+    setIsDeleting(true)
 
-    if (!notes || !noteIdToDelete) return;
+    if (!notes || !noteIdToDelete) return
 
-    await runQuery(DELETE_NOTE(noteIdToDelete));
+    await runQuery(DELETE_NOTE(noteIdToDelete))
 
-    if (selectedNoteId === noteIdToDelete) setSelectedNoteId(null);
-    setNotes(notes.filter(noteFilter => noteFilter.ref.id !== noteIdToDelete));
-    handleDeleteModalToggle();
-    setNoteIdToDelete(null);
-    setIsDeleting(false);
-  }, [handleDeleteModalToggle, noteIdToDelete, notes, selectedNoteId]);
+    if (selectedNoteId === noteIdToDelete) setSelectedNoteId(null)
+    setNotes(notes.filter(noteFilter => noteFilter.ref.id !== noteIdToDelete))
+    handleDeleteModalToggle()
+    setNoteIdToDelete(null)
+    setIsDeleting(false)
+  }, [handleDeleteModalToggle, noteIdToDelete, notes, selectedNoteId])
 
   const handleLogout = useCallback(() => {
-    logout();
-    navigate && navigate("/");
-  }, [navigate]);
+    logout()
+    navigate && navigate('/')
+  }, [navigate])
 
   if (!sortedNotes)
     return (
       <div className="h-100 w-100 d-flex align-items-center justify-content-center">
         Loading...
       </div>
-    );
+    )
 
   return (
     <>
@@ -184,14 +178,14 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
               className="btn btn-block btn-primary mb-3"
               disabled={isCreating}
             >
-              {isCreating ? "Creating..." : "New note"}
+              {isCreating ? 'Creating...' : 'New note'}
             </button>
 
             {sortedNotes.map(note => (
               <div
                 onClick={() => handleNoteClick(note)}
                 className={`note card mb-1 ${note.ref.id === selectedNoteId &&
-                  "note--active"}`}
+                  'note--active'}`}
                 key={note.ref.id}
               >
                 <div className="card-body">
@@ -257,7 +251,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
               <div className="notes__empty h-100 d-flex align-items-center justify-content-center">
                 <div className="text-center">
                   <p className="display-3 text-muted">
-                    {hasNotes ? "Select a note" : "Start use notes"}
+                    {hasNotes ? 'Select a note' : 'Start use notes'}
                   </p>
 
                   {!hasNotes && (
@@ -267,7 +261,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
                       type="button"
                       disabled={isCreating}
                     >
-                      {isCreating ? "Creating..." : "Create your first note"}
+                      {isCreating ? 'Creating...' : 'Create your first note'}
                     </button>
                   )}
                 </div>
@@ -295,14 +289,14 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
                 className="btn btn-outline-danger ml-1"
                 disabled={isDeleting}
               >
-                {isDeleting ? "Deleting..." : "Delete note"}
+                {isDeleting ? 'Deleting...' : 'Delete note'}
               </button>
             </div>
           </div>
         </ModalBody>
       </Modal>
     </>
-  );
-};
+  )
+}
 
-export default Notes;
+export default Notes

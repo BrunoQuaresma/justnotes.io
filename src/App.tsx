@@ -1,8 +1,8 @@
-import React from "react";
-import { Router } from "@reach/router";
-import Notes from "./Notes";
-import SignIn from "./SignIn";
-import SignUp from "./SignUp";
+import React from 'react'
+import { Router } from '@reach/router'
+import Notes from './Notes'
+import SignIn from './SignIn'
+import SignUp from './SignUp'
 
 const App: React.FC = () => {
   return (
@@ -11,7 +11,7 @@ const App: React.FC = () => {
       <SignUp path="/register" />
       <Notes path="/notes" />
     </Router>
-  );
-};
+  )
+}
 
-export default App;
+export default App

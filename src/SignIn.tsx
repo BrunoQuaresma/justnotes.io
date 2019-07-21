@@ -1,37 +1,37 @@
-import React, { useState, useCallback } from "react";
-import { RouteComponentProps, Link } from "@reach/router";
-import useForm from "./useForm";
-import { signIn } from "./auth";
+import React, { useState, useCallback } from 'react'
+import { RouteComponentProps, Link } from '@reach/router'
+import useForm from './useForm'
+import { signIn } from './auth'
 
 type SignInValues = {
-  email: string;
-  password: string;
-};
+  email: string
+  password: string
+}
 
 const initialFormValues = {
-  email: "",
-  password: ""
-};
+  email: '',
+  password: ''
+}
 
 const SignIn: React.FC<RouteComponentProps> = ({ navigate }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { handleSubmit, fieldProps } = useForm<SignInValues>(initialFormValues);
+  const [isLoading, setIsLoading] = useState(false)
+  const { handleSubmit, fieldProps } = useForm<SignInValues>(initialFormValues)
 
   const loginUser = useCallback(
     async (values: SignInValues) => {
-      setIsLoading(true);
-      await signIn(values);
-      navigate && navigate("/notes");
+      setIsLoading(true)
+      await signIn(values)
+      navigate && navigate('/notes')
     },
     [navigate]
-  );
+  )
 
   return (
     <div className="container h-100 d-flex align-items-center">
       <div className="row">
         <div className="col-lg-8">
           <h1 className="display-2 font-weight-bold">
-            Welcome back to your notes app.{" "}
+            Welcome back to your notes app.{' '}
             <span className="text-muted font-weight-normal">
               Just simple, just notes.
             </span>
@@ -46,7 +46,7 @@ const SignIn: React.FC<RouteComponentProps> = ({ navigate }) => {
                 autoFocus
                 type="email"
                 className="form-control"
-                {...fieldProps("email")}
+                {...fieldProps('email')}
               />
             </div>
 
@@ -56,13 +56,13 @@ const SignIn: React.FC<RouteComponentProps> = ({ navigate }) => {
                 required
                 type="password"
                 className="form-control"
-                {...fieldProps("password")}
+                {...fieldProps('password')}
               />
             </div>
 
             <div className="form-group">
               <button className="btn btn-dark btn-block" disabled={isLoading}>
-                {isLoading ? "Login..." : "Login"}
+                {isLoading ? 'Login...' : 'Login'}
               </button>
               <Link to="/register" className="btn btn-light btn-block">
                 Register
@@ -72,7 +72,7 @@ const SignIn: React.FC<RouteComponentProps> = ({ navigate }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SignIn;
+export default SignIn
