@@ -29,7 +29,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "setup": "source .env.local && export FAUNADB_SECRET=$FAUNADB_ADMIN_KEY && faunadb-migrate setup && faunadb-migrate migrate",
+    "setup": "export FAUNADB_SECRET=$FAUNADB_ADMIN_KEY && faunadb-migrate setup && faunadb-migrate migrate",
     "format": "prettier-eslint --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
   "eslintConfig": {
