@@ -227,9 +227,9 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
 
           <div className="d-md-flex flex-column col-md-8 col-lg-9 p-3">
             <div className="row px-3 py-1 mb-3 justify-content-end">
-              <button className="btn btn-sm btn-outline-primary mr-1">
+              {/* <button className="btn btn-sm btn-outline-primary mr-1">
                 Share note
-              </button>
+              </button> */}
 
               <UncontrolledDropdown>
                 <DropdownToggle outline color="secondary" size="sm" caret>
@@ -287,7 +287,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
               </button>
               <button
                 onClick={handleDeleteModalConfirm}
-                className="btn btn-outline-danger"
+                className="btn btn-outline-danger ml-1"
                 disabled={isDeleting}
               >
                 {isDeleting ? "Deleting..." : "Delete note"}
