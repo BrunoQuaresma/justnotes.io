@@ -2,10 +2,10 @@
 Access [justnotes.io](https://justnotes.io) to see the production app.
 
 ## What is the goal? 
-This app was built to learning and share knowledge with the community using a "real"(We never know when we are going to build the next unicorn startup right?) project. Eventually, I'll publish some blog posts into my personal blog [https://brunoquaresma.dev](https://brunoquaresma.dev) related to this project learnings.
+This app was built to learn and share knowledge with the community using a "real" project. (We never know when we are going to build the next unicorn startup right?)  Eventually, I'll publish some blog posts on my personal blog [https://brunoquaresma.dev](https://brunoquaresma.dev) related to this project's, learnings.
 
 ## Questions or suggestions?
-If you have questions or suggestions you can open an issue and I'll try to answer you as quick as possible. Make questions are important and you can give me some feedback and maybe, I can write something about it.
+If you have questions or suggestions you can open an issue and I'll try to answer you as quickly as possible. Also, feel free to ask questions and provide feedback. Maybe your questions or comments will give me something I can write about on the blog.
 
 ## Techstack
 - [FaunaDB](https://fauna.com/)
