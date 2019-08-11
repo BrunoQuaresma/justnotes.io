@@ -1,5 +1,5 @@
 import faunadb, { query as q, Expr, Client } from 'faunadb'
-import { getSession } from './authService'
+import { getSession } from './auth'
 
 export type Note = {
   ref: faunadb.values.Ref
