@@ -5,7 +5,7 @@ type Credentials = {
   password: string
 }
 
-type AuthSession = {
+export type AuthSession = {
   id: string
   secret: string
 }
@@ -19,12 +19,25 @@ type AuthStorage = {
 type AuthConfig = {
   client: faunadb.Client
   storage: AuthStorage
+  event: {
+    emit: (eventName: string, value: any) => void
+  }
+}
+
+export const events = {
+  startSession: 'start_session'
 }
 
 let config: AuthConfig
 
 export const configure = (newConfig: AuthConfig) => {
   config = newConfig
+
+  const existentSession = getSession()
+
+  if (existentSession) {
+    config.event.emit(events.startSession, existentSession)
+  }
 }
 
 export const signUp = async ({ email, password }: Credentials) => {
@@ -69,6 +82,7 @@ export const signIn = async ({ email, password }: Credentials) => {
 
 export const setSession = (session: AuthSession) => {
   config.storage.set('session', session)
+  config.event.emit(events.startSession, session)
 }
 
 export const getSession = (): AuthSession | undefined => {
