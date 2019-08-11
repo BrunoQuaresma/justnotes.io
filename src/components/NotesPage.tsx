@@ -6,7 +6,6 @@ import React, {
   useRef,
   Fragment
 } from 'react'
-import faunadb from 'faunadb'
 import ReactGA from 'react-ga'
 import { format } from 'timeago.js'
 import {
@@ -25,16 +24,9 @@ import {
   createEmptyNote,
   deleteNote
 } from '../services/noteService'
+import { Note } from '../services/noteService'
 
 let timeouts: { [key: string]: number } = {}
-
-type Note = {
-  ref: faunadb.values.Ref
-  ts: number
-  data: {
-    content: string
-  }
-}
 
 const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null)

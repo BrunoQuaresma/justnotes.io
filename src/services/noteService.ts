@@ -1,6 +1,14 @@
 import faunadb, { query as q, Expr, Client } from 'faunadb'
 import { getSession } from './authService'
 
+export type Note = {
+  ref: faunadb.values.Ref
+  ts: number
+  data: {
+    content: string
+  }
+}
+
 let client: Client
 
 export const call = (expr: Expr) => {
