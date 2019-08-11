@@ -11,13 +11,13 @@ import {
   ModalBody
 } from 'reactstrap'
 import { RouteComponentProps } from '@reach/router'
-import { logout } from '../auth/authService'
+import { logout } from '../services/authService'
 import {
   getUserNotes,
   updateNoteContent,
   createEmptyNote,
   deleteNote
-} from './notesService'
+} from '../services/noteService'
 
 let timeouts: { [key: string]: number } = {}
 
@@ -181,6 +181,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
 
   return (
     <>
+      ' \' \' '
       <div className="notes container-fluid">
         <div className="row">
           <div className="scrollable-y col-md-4 col-lg-3 bg-light p-3">
@@ -277,7 +278,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
           </div>
         </div>
       </div>
-
+      ' \' \' '
       <Modal isOpen={isDeleteModalOpen} toggle={handleDeleteModalToggle}>
         <ModalBody>
           <div className="p-4">
@@ -302,6 +303,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
           </div>
         </ModalBody>
       </Modal>
+      ' \' \' '
     </>
   )
 }

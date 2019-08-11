@@ -1,5 +1,5 @@
 import faunadb, { query as q, Expr, Client } from 'faunadb'
-import { getSession } from '../auth/authService'
+import { getSession } from './authService'
 
 let client: Client
 
