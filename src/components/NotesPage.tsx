@@ -18,13 +18,7 @@ import {
 } from 'reactstrap'
 import { RouteComponentProps } from '@reach/router'
 import { logout } from 'auth'
-import {
-  Note,
-  getUserNotes,
-  updateNoteContent,
-  createEmptyNote,
-  deleteNote
-} from 'note'
+import { Note, getUserNotes, updateNote, createNote, deleteNote } from 'note'
 
 let timeouts: { [key: string]: number } = {}
 
@@ -38,6 +32,14 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null)
   const hasNotes = useMemo(() => notes && notes.length > 0, [notes])
+  const selectedNote = useMemo(
+    () => notes && notes.find(note => note.ref.id === selectedNoteId),
+    [notes, selectedNoteId]
+  )
+  const noteToDelete = useMemo(
+    () => notes && notes.find(note => note.ref.id === noteIdToDelete),
+    [noteIdToDelete, notes]
+  )
 
   const sortedNotes = useMemo(() => {
     if (!notes) return null
@@ -45,9 +47,7 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   }, [notes])
 
   useEffect(() => {
-    getUserNotes().then((result: any) => {
-      setNotes(result.data)
-    })
+    getUserNotes().then(setNotes)
   }, [])
 
   const focusTextarea = useCallback(() => {
@@ -94,12 +94,12 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
 
       setTextareavalue(updatedContent)
 
-      if (selectedNoteId) {
+      if (selectedNoteId && selectedNote) {
         updateNoteState(selectedNoteId, updatedContent)
 
         window.clearInterval(timeouts[selectedNoteId])
         timeouts[selectedNoteId] = window.setTimeout(() => {
-          updateNoteContent(selectedNoteId, updatedContent)
+          updateNote(selectedNote, { content: updatedContent })
           ReactGA.event({
             category: 'Note',
             action: 'Update'
@@ -107,14 +107,14 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
         }, 1000)
       }
     },
-    [selectedNoteId, updateNoteState]
+    [selectedNote, selectedNoteId, updateNoteState]
   )
 
   const handleNewClick = useCallback(async () => {
     if (!notes) return
     setIsCreating(true)
 
-    const newNote: any = await createEmptyNote()
+    const newNote = await createNote({ content: '' })
     ReactGA.event({
       category: 'Note',
       action: 'Create'
@@ -147,9 +147,9 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   const handleDeleteModalConfirm = useCallback(async () => {
     setIsDeleting(true)
 
-    if (!notes || !noteIdToDelete) return
+    if (!notes || !noteIdToDelete || !noteToDelete) return
 
-    await deleteNote(noteIdToDelete)
+    await deleteNote(noteToDelete)
     ReactGA.event({
       category: 'Note',
       action: 'Delete'
@@ -160,7 +160,13 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
     handleDeleteModalToggle()
     setNoteIdToDelete(null)
     setIsDeleting(false)
-  }, [handleDeleteModalToggle, noteIdToDelete, notes, selectedNoteId])
+  }, [
+    handleDeleteModalToggle,
+    noteIdToDelete,
+    noteToDelete,
+    notes,
+    selectedNoteId
+  ])
 
   const handleLogout = useCallback(() => {
     logout()
