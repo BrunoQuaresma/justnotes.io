@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react'
 import { RouteComponentProps, Link } from '@reach/router'
 import ReactGA from 'react-ga'
-import useForm from '../hooks/useForm'
-import { signIn } from '../auth'
+import useForm from 'hooks/useForm'
+import { signIn } from 'auth'
 
 type SignInValues = {
   email: string

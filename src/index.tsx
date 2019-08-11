@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom'
 import ReactGA from 'react-ga'
 import cookies from 'js-cookie'
 import faunadb from 'faunadb'
-import App from './components/App'
-import * as serviceWorker from './serviceWorker'
-import * as Auth from './auth'
+import App from 'components/App'
+import * as serviceWorker from 'serviceWorker'
+import * as Auth from 'auth'
 
 const { REACT_APP_GA_ID, REACT_APP_FAUNADB_AUTH_KEY } = process.env
 
