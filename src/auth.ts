@@ -1,14 +1,19 @@
 import faunadb, { query as q } from 'faunadb'
 import cookies from 'js-cookie'
 
-const client = new faunadb.Client({
-  secret: String(process.env.REACT_APP_FAUNADB_AUTH_KEY)
-})
-
 type Credentials = {
   email: string
   password: string
 }
+
+type AuthSession = {
+  id: string
+  secret: string
+}
+
+const client = new faunadb.Client({
+  secret: String(process.env.REACT_APP_FAUNADB_AUTH_KEY)
+})
 
 export const signUp = async ({ email, password }: Credentials) => {
   const session: any = await client.query(
@@ -48,11 +53,6 @@ export const signIn = async ({ email, password }: Credentials) => {
   setSession(session)
 
   return session
-}
-
-type AuthSession = {
-  id: string
-  secret: string
 }
 
 export const setSession = (session: AuthSession) => {
