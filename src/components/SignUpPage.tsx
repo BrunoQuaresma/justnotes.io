@@ -16,7 +16,7 @@ const initialFormValues = {
   confirmPassword: ''
 }
 
-const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
+const SignUpPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   const [isLoading, setIsLoading] = useState(false)
   const { handleSubmit, fieldProps } = useForm<SignUpValues>(initialFormValues)
 
@@ -119,4 +119,4 @@ const SignUp: React.FC<RouteComponentProps> = ({ navigate }) => {
   )
 }
 
-export default SignUp
+export default SignUpPage

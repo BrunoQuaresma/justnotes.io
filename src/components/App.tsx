@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactGA from 'react-ga'
 import { createHistory, LocationProvider, Router } from '@reach/router'
-import Notes from './Notes'
-import SignIn from './SignIn'
-import SignUp from './SignUp'
+import NotesPage from './NotesPage'
+import SignInPage from './SignInPage'
+import SignUpPage from './SignUpPage'
 import './styles/index.css'
 
 // @ts-ignore
@@ -17,9 +17,9 @@ const App: React.FC = () => {
   return (
     <LocationProvider history={history}>
       <Router>
-        <SignIn path="/" />
-        <SignUp path="/register" />
-        <Notes path="/notes" />
+        <SignInPage path="/" />
+        <SignUpPage path="/register" />
+        <NotesPage path="/notes" />
       </Router>
     </LocationProvider>
   )
