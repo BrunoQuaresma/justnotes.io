@@ -17,14 +17,14 @@ import {
   ModalBody
 } from 'reactstrap'
 import { RouteComponentProps } from '@reach/router'
-import { logout } from '../services/authService'
+import { logout } from '../auth'
 import {
   getUserNotes,
   updateNoteContent,
   createEmptyNote,
   deleteNote
-} from '../services/noteService'
-import { Note } from '../services/noteService'
+} from '../note'
+import { Note } from '../note'
 
 let timeouts: { [key: string]: number } = {}
 
