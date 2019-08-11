@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import ReactGA from 'react-ga'
-import App from './App'
+import App from './components/App'
 import * as serviceWorker from './serviceWorker'
 
 const { REACT_APP_GA_ID } = process.env
