@@ -6,7 +6,6 @@ type Credentials = {
 }
 
 export type AuthSession = {
-  id: string
   secret: string
 }
 
@@ -51,7 +50,6 @@ export const signUp = async ({ email, password }: Credentials) => {
         token: q.Login(q.Select(['ref'], q.Var('user')), { password })
       },
       {
-        id: q.Select(['instance', 'id'], q.Var('token')),
         secret: q.Select(['secret'], q.Var('token'))
       }
     )
@@ -69,7 +67,6 @@ export const signIn = async ({ email, password }: Credentials) => {
         token: q.Login(q.Match(q.Index('user_by_email'), [email]), { password })
       },
       {
-        id: q.Select(['instance', 'id'], q.Var('token')),
         secret: q.Select(['secret'], q.Var('token'))
       }
     )
