@@ -1,11 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  Fragment
-} from 'react'
+import React, { useEffect, useCallback, useMemo, useRef, Fragment } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { PayloadAction } from 'redux-starter-kit'
 import ReactGA from 'react-ga'
@@ -29,6 +22,14 @@ import {
   deleteNoteById,
   NoteItem
 } from 'stores/noteStore'
+import {
+  selectNote,
+  updateContent,
+  selectBoard,
+  selectNoteToDelete,
+  clearDelete,
+  clearSelect
+} from 'stores/boardStore'
 import { ThunkDispatch } from 'redux-thunk'
 
 let timeouts: { [key: string]: number } = {}
@@ -37,11 +38,8 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   const dispatch = useDispatch<ThunkDispatch<any, any, PayloadAction>>()
   const notes: NoteItem[] = useSelector(selectNotes)
   const loadingState = useSelector(selectLoadingState)
+  const boardState = useSelector(selectBoard)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
-  const [textareaValue, setTextareavalue] = useState<string>('')
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null)
   const hasNotes = useMemo(() => notes && notes.length > 0, [notes])
 
   useEffect(() => {
@@ -56,30 +54,28 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
 
   const handleNoteClick = useCallback(
     (note: NoteItem) => {
-      setSelectedNoteId(note.id)
-      setTextareavalue(note.content)
+      dispatch(selectNote(note))
       focusTextarea()
     },
-    [focusTextarea]
+    [dispatch, focusTextarea]
   )
 
   const handleTextChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const updatedContent = event.currentTarget.value
-      setTextareavalue(updatedContent)
+      const newContent = event.currentTarget.value
+      dispatch(updateContent(newContent))
 
-      if (selectedNoteId) {
-        window.clearInterval(timeouts[selectedNoteId])
-        timeouts[selectedNoteId] = window.setTimeout(() => {
-          dispatch(updateNoteById(selectedNoteId, { content: updatedContent }))
-          ReactGA.event({
-            category: 'Note',
-            action: 'Update'
-          })
-        }, 1000)
-      }
+      const { selectedNoteId } = boardState
+      window.clearInterval(timeouts[selectedNoteId])
+      timeouts[selectedNoteId] = window.setTimeout(() => {
+        dispatch(updateNoteById(selectedNoteId, { content: newContent }))
+        ReactGA.event({
+          category: 'Note',
+          action: 'Update'
+        })
+      }, 1000)
     },
-    [dispatch, selectedNoteId]
+    [boardState, dispatch]
   )
 
   const handleNewClick = useCallback(async () => {
@@ -92,42 +88,39 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
       action: 'Create'
     })
 
-    setSelectedNoteId(newNote.id)
-    setTextareavalue(newNote.content)
+    dispatch(selectNote(newNote))
     focusTextarea()
   }, [dispatch, focusTextarea])
 
-  const handleDropdownClick = useCallback((event: React.MouseEvent) => {
-    event.stopPropagation()
-  }, [])
-
-  const handleDeleteModalToggle = useCallback(() => {
-    setIsDeleteModalOpen(!isDeleteModalOpen)
-  }, [isDeleteModalOpen])
-
-  const handleNoteDelete = useCallback(
-    async (note: NoteItem, event: React.MouseEvent) => {
-      event.stopPropagation()
-      setNoteIdToDelete(note.id)
-      handleDeleteModalToggle()
-    },
-    [handleDeleteModalToggle]
+  const handleDropdownClick = useCallback(
+    (event: React.MouseEvent) => event.stopPropagation(),
+    []
   )
 
+  const handleNoteDelete = useCallback(
+    (note: NoteItem, event: React.MouseEvent) => {
+      event.stopPropagation()
+      dispatch(selectNoteToDelete(note))
+    },
+    [dispatch]
+  )
+
+  const handleNoteDeleteCancel = useCallback(() => {
+    dispatch(clearDelete())
+  }, [dispatch])
+
   const handleDeleteModalConfirm = useCallback(async () => {
-    if (!notes || !noteIdToDelete) return
-
+    const { selectedNoteId, noteIdToDelete } = boardState
     await dispatch(deleteNoteById(noteIdToDelete))
-
     ReactGA.event({
       category: 'Note',
       action: 'Delete'
     })
-
-    if (selectedNoteId === noteIdToDelete) setSelectedNoteId(null)
-    handleDeleteModalToggle()
-    setNoteIdToDelete(null)
-  }, [dispatch, handleDeleteModalToggle, noteIdToDelete, notes, selectedNoteId])
+    if (selectedNoteId === noteIdToDelete) {
+      dispatch(clearSelect())
+    }
+    dispatch(clearDelete())
+  }, [boardState, dispatch])
 
   const handleLogout = useCallback(() => {
     logout()
@@ -161,8 +154,8 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
             {notes.map(note => (
               <div
                 onClick={() => handleNoteClick(note)}
-                className={`note card mb-1 ${note.id === selectedNoteId &&
-                  'note--active'}`}
+                className={`note card mb-1 ${note.id ===
+                  boardState.selectedNoteId && 'note--active'}`}
                 key={note.id}
               >
                 <div className="card-body">
@@ -213,10 +206,10 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
               </UncontrolledDropdown>
             </div>
 
-            {selectedNoteId ? (
+            {boardState.selectedNoteId ? (
               <textarea
                 ref={textAreaRef}
-                value={textareaValue}
+                value={boardState.content}
                 onChange={handleTextChange}
                 placeholder="Type your note here..."
               />
@@ -246,7 +239,10 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
         </div>
       </div>
 
-      <Modal isOpen={isDeleteModalOpen} toggle={handleDeleteModalToggle}>
+      <Modal
+        isOpen={!!boardState.noteIdToDelete}
+        toggle={handleNoteDeleteCancel}
+      >
         <ModalBody>
           <div className="p-4">
             <div className="text-center mb-3 lead">
@@ -255,7 +251,7 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
             <div className="text-center">
               <button
                 className="btn text-muted"
-                onClick={handleDeleteModalToggle}
+                onClick={handleNoteDeleteCancel}
               >
                 Cancel
               </button>

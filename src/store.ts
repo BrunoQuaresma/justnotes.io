@@ -1,9 +1,11 @@
 import { configureStore } from 'redux-starter-kit'
 import noteReducer from 'stores/noteStore'
+import boardReducer from 'stores/boardStore'
 
 const store = configureStore({
   reducer: {
-    notes: noteReducer
+    notes: noteReducer,
+    board: boardReducer
   }
 })
 
