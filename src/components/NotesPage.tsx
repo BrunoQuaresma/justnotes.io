@@ -6,6 +6,8 @@ import React, {
   useRef,
   Fragment
 } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { PayloadAction } from 'redux-starter-kit'
 import ReactGA from 'react-ga'
 import { format } from 'timeago.js'
 import {
@@ -18,43 +20,33 @@ import {
 } from 'reactstrap'
 import { RouteComponentProps } from '@reach/router'
 import { logout } from 'auth'
+import { Note } from 'apis/noteApi'
 import {
-  Note,
-  getAllNotes,
-  updateNote,
+  selectNotes,
+  selectLoadingState,
+  fetchNotes,
+  updateNoteById,
   createNote,
-  deleteNote
-} from 'apis/noteApi'
+  deleteNoteById
+} from 'stores/noteStore'
+import { ThunkDispatch } from 'redux-thunk'
 
 let timeouts: { [key: string]: number } = {}
 
 const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
+  const dispatch = useDispatch<ThunkDispatch<any, any, PayloadAction>>()
+  const notes: Note[] = useSelector(selectNotes)
+  const loadingState = useSelector(selectLoadingState)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
-  const [notes, setNotes] = useState<Note[] | null>(null)
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
   const [textareaValue, setTextareavalue] = useState<string>('')
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [isCreating, setIsCreating] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null)
   const hasNotes = useMemo(() => notes && notes.length > 0, [notes])
-  const selectedNote = useMemo(
-    () => notes && notes.find(note => note.ref.id === selectedNoteId),
-    [notes, selectedNoteId]
-  )
-  const noteToDelete = useMemo(
-    () => notes && notes.find(note => note.ref.id === noteIdToDelete),
-    [noteIdToDelete, notes]
-  )
-
-  const sortedNotes = useMemo(() => {
-    if (!notes) return null
-    return notes.concat().sort((a, b) => b.ts - a.ts)
-  }, [notes])
 
   useEffect(() => {
-    getAllNotes().then(setNotes)
-  }, [])
+    dispatch(fetchNotes())
+  }, [dispatch])
 
   const focusTextarea = useCallback(() => {
     if (textAreaRef.current) {
@@ -71,41 +63,15 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
     [focusTextarea]
   )
 
-  const updateNoteState = useCallback(
-    (noteId: string, updatedContent: string) => {
-      if (!notes) return
-
-      setNotes(
-        notes.map(note => {
-          if (note.ref.id === noteId) {
-            return {
-              ...note,
-              data: {
-                ...note.data,
-                content: updatedContent
-              }
-            }
-          }
-
-          return note
-        })
-      )
-    },
-    [notes]
-  )
-
   const handleTextChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       const updatedContent = event.currentTarget.value
-
       setTextareavalue(updatedContent)
 
-      if (selectedNoteId && selectedNote) {
-        updateNoteState(selectedNoteId, updatedContent)
-
+      if (selectedNoteId) {
         window.clearInterval(timeouts[selectedNoteId])
         timeouts[selectedNoteId] = window.setTimeout(() => {
-          updateNote(selectedNote, { content: updatedContent })
+          dispatch(updateNoteById(selectedNoteId, { content: updatedContent }))
           ReactGA.event({
             category: 'Note',
             action: 'Update'
@@ -113,25 +79,23 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
         }, 1000)
       }
     },
-    [selectedNote, selectedNoteId, updateNoteState]
+    [dispatch, selectedNoteId]
   )
 
   const handleNewClick = useCallback(async () => {
-    if (!notes) return
-    setIsCreating(true)
+    const newNote = await dispatch(createNote())
 
-    const newNote = await createNote({ content: '' })
+    if (!newNote) return
+
     ReactGA.event({
       category: 'Note',
       action: 'Create'
     })
 
-    setNotes(notes.concat(newNote))
     setSelectedNoteId(newNote.ref.id)
     setTextareavalue(newNote.data.content)
-    setIsCreating(false)
     focusTextarea()
-  }, [focusTextarea, notes])
+  }, [dispatch, focusTextarea])
 
   const handleDropdownClick = useCallback((event: React.MouseEvent) => {
     event.stopPropagation()
@@ -151,28 +115,19 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   )
 
   const handleDeleteModalConfirm = useCallback(async () => {
-    setIsDeleting(true)
+    if (!notes || !noteIdToDelete) return
 
-    if (!notes || !noteIdToDelete || !noteToDelete) return
+    await dispatch(deleteNoteById(noteIdToDelete))
 
-    await deleteNote(noteToDelete)
     ReactGA.event({
       category: 'Note',
       action: 'Delete'
     })
 
     if (selectedNoteId === noteIdToDelete) setSelectedNoteId(null)
-    setNotes(notes.filter(noteFilter => noteFilter.ref.id !== noteIdToDelete))
     handleDeleteModalToggle()
     setNoteIdToDelete(null)
-    setIsDeleting(false)
-  }, [
-    handleDeleteModalToggle,
-    noteIdToDelete,
-    noteToDelete,
-    notes,
-    selectedNoteId
-  ])
+  }, [dispatch, handleDeleteModalToggle, noteIdToDelete, notes, selectedNoteId])
 
   const handleLogout = useCallback(() => {
     logout()
@@ -183,7 +138,7 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
     navigate && navigate('/')
   }, [navigate])
 
-  if (!sortedNotes)
+  if (loadingState.isLoading)
     return (
       <div className="h-100 w-100 d-flex align-items-center justify-content-center">
         Loading...
@@ -198,12 +153,12 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
             <button
               onClick={handleNewClick}
               className="btn btn-block btn-primary mb-3"
-              disabled={isCreating}
+              disabled={loadingState.isCreating}
             >
-              {isCreating ? 'Creating...' : 'New note'}
+              {loadingState.isCreating ? 'Creating...' : 'New note'}
             </button>
 
-            {sortedNotes.map(note => (
+            {notes.map(note => (
               <div
                 onClick={() => handleNoteClick(note)}
                 className={`note card mb-1 ${note.ref.id === selectedNoteId &&
@@ -277,9 +232,11 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
                       onClick={handleNewClick}
                       className="btn btn-primary"
                       type="button"
-                      disabled={isCreating}
+                      disabled={loadingState.isCreating}
                     >
-                      {isCreating ? 'Creating...' : 'Create your first note'}
+                      {loadingState.isCreating
+                        ? 'Creating...'
+                        : 'Create your first note'}
                     </button>
                   )}
                 </div>
@@ -305,9 +262,9 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
               <button
                 onClick={handleDeleteModalConfirm}
                 className="btn btn-outline-danger ml-1"
-                disabled={isDeleting}
+                disabled={loadingState.isDeleting}
               >
-                {isDeleting ? 'Deleting...' : 'Delete note'}
+                {loadingState.isDeleting ? 'Deleting...' : 'Delete note'}
               </button>
             </div>
           </div>

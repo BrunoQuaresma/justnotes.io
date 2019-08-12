@@ -4,7 +4,7 @@ type Page<T> = {
   data: T[]
 }
 
-type NoteData = {
+export type NoteData = {
   content: string
 }
 
@@ -34,9 +34,9 @@ export const getAllNotes = async () => {
   return result.data
 }
 
-export const updateNote = async (note: Note, data: NoteData) => {
+export const updateNoteById = async (noteId: string, data: NoteData) => {
   const updatedNote: Note = (await config.client.query(
-    q.Update(note.ref, { data })
+    q.Update(q.Ref(q.Collection('Notes'), noteId), { data })
   )) as any
 
   return updatedNote
@@ -52,5 +52,10 @@ export const createNote = async (data: NoteData) => {
   return newNote
 }
 
-export const deleteNote = (note: Note) =>
-  config.client.query(q.Delete(note.ref))
+export const deleteNoteById = async (noteId: string) => {
+  const deletedNote: Note = (await config.client.query(
+    q.Delete(q.Ref(q.Collection('Notes'), noteId))
+  )) as any
+
+  return deletedNote
+}

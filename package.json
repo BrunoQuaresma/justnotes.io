@@ -10,6 +10,7 @@
     "@types/reach__router": "^1.2.4",
     "@types/react": "16.8.23",
     "@types/react-dom": "16.8.4",
+    "@types/react-redux": "^7.1.1",
     "@types/reactstrap": "^8.0.1",
     "faunadb": "^2.7.0",
     "faunadb-migrate": "https://github.com/BrunoQuaresma/faunadb-migrate/#master",
@@ -19,8 +20,10 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-ga": "^2.6.0",
+    "react-redux": "^7.1.0",
     "react-scripts": "3.0.1",
     "reactstrap": "^8.0.1",
+    "redux-starter-kit": "^0.6.3",
     "timeago.js": "^4.0.0-beta.2",
     "ts-node": "^8.3.0",
     "typescript": "3.5.3"
