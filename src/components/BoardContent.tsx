@@ -2,23 +2,16 @@ import React, { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { PayloadAction } from 'redux-starter-kit'
 import ReactGA from 'react-ga'
-import { RouteComponentProps } from '@reach/router'
-import {
-  selectNotes,
-  selectLoadingState,
-  updateNoteById,
-  createNote,
-  NoteItem
-} from 'stores/noteStore'
-import { selectNote, updateContent, selectBoard } from 'stores/boardStore'
+import { selectNotes, updateNoteById, NoteItem } from 'stores/noteStore'
+import { updateContent, selectBoard } from 'stores/boardStore'
 import { ThunkDispatch } from 'redux-thunk'
+import NewNoteButton from 'components/NewNoteButton'
 
 let timeouts: { [key: string]: number } = {}
 
-const BoardContent: React.FC<RouteComponentProps> = ({ navigate }) => {
+const BoardContent: React.FC = () => {
   const dispatch = useDispatch<ThunkDispatch<any, any, PayloadAction>>()
   const notes: NoteItem[] = useSelector(selectNotes)
-  const loadingState = useSelector(selectLoadingState)
   const boardState = useSelector(selectBoard)
   const hasNotes = useMemo(() => notes && notes.length > 0, [notes])
 
@@ -40,19 +33,6 @@ const BoardContent: React.FC<RouteComponentProps> = ({ navigate }) => {
     [boardState, dispatch]
   )
 
-  const handleNewClick = useCallback(async () => {
-    const newNote = await dispatch(createNote())
-
-    if (!newNote) return
-
-    ReactGA.event({
-      category: 'Note',
-      action: 'Create'
-    })
-
-    dispatch(selectNote(newNote))
-  }, [dispatch])
-
   if (!boardState.selectedNoteId)
     return (
       <div className="notes__empty h-100 d-flex align-items-center justify-content-center">
@@ -62,16 +42,7 @@ const BoardContent: React.FC<RouteComponentProps> = ({ navigate }) => {
           </p>
 
           {!hasNotes && (
-            <button
-              onClick={handleNewClick}
-              className="btn btn-primary"
-              type="button"
-              disabled={loadingState.isCreating}
-            >
-              {loadingState.isCreating
-                ? 'Creating...'
-                : 'Create your first note'}
-            </button>
+            <NewNoteButton label="Create your first note"></NewNoteButton>
           )}
         </div>
       </div>
