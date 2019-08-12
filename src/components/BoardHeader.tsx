@@ -6,18 +6,18 @@ import {
   DropdownMenu,
   DropdownItem
 } from 'reactstrap'
-import { RouteComponentProps } from '@reach/router'
+import { history } from 'components/App'
 import { logout } from 'auth'
 
-const BoardHeader: React.FC<RouteComponentProps> = ({ navigate }) => {
+const BoardHeader: React.FC = () => {
   const handleLogout = useCallback(() => {
     logout()
     ReactGA.event({
       category: 'User',
       action: 'Logout'
     })
-    navigate && navigate('/')
-  }, [navigate])
+    history.navigate('/')
+  }, [])
 
   return (
     <div className="row px-3 py-1 mb-3">

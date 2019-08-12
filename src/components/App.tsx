@@ -9,7 +9,7 @@ import SignUpPage from 'components/SignUpPage'
 import 'styles/index.css'
 
 // @ts-ignore
-const history = createHistory(window)
+export const history = createHistory(window)
 history.listen(() => {
   ReactGA.pageview(window.location.pathname + window.location.search)
 })
