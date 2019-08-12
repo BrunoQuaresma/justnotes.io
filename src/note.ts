@@ -24,7 +24,7 @@ export const configure = (newConfig: NoteConfig) => {
   config = newConfig
 }
 
-export const getAll = async () => {
+export const getAllNotes = async () => {
   const result: Page<Note> = (await config.client.query(
     q.Map(q.Paginate(q.Match(q.Index('notes_by_owner'), [q.Identity()])), ref =>
       q.Get(ref)
