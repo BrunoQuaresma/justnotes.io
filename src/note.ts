@@ -1,39 +1,43 @@
-import faunadb, { query as q, Expr, Client } from 'faunadb'
-import { getSession } from '../auth/authService'
+import faunadb, { query as q } from 'faunadb'
 
-let client: Client
-
-export const call = (expr: Expr) => {
-  if (!client) {
-    const session = getSession()
-    if (!session) throw new Error('No session found.')
-
-    client = new faunadb.Client({ secret: session.secret })
+export type Note = {
+  ref: faunadb.values.Ref
+  ts: number
+  data: {
+    content: string
   }
+}
 
-  return client.query(expr)
+type NoteConfig = {
+  client: faunadb.Client
+}
+
+let config: NoteConfig
+
+export const configure = (newConfig: NoteConfig) => {
+  config = newConfig
 }
 
 export const getUserNotes = () =>
-  call(
+  config.client.query(
     q.Map(q.Paginate(q.Match(q.Index('notes_by_owner'), [q.Identity()])), ref =>
       q.Get(ref)
     )
   )
 
 export const updateNoteContent = (noteId: string, noteContent: string) =>
-  call(
+  config.client.query(
     q.Update(q.Ref(q.Collection('Notes'), noteId), {
       data: { content: noteContent }
     })
   )
 
 export const createEmptyNote = () =>
-  call(
+  config.client.query(
     q.Create(q.Collection('Notes'), {
       data: { owner: q.Identity(), content: '' }
     })
   )
 
 export const deleteNote = (noteId: string) =>
-  call(q.Delete(q.Ref(q.Collection('Notes'), noteId)))
+  config.client.query(q.Delete(q.Ref(q.Collection('Notes'), noteId)))

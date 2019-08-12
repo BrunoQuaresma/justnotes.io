@@ -1,5 +1,11 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import faunadb from 'faunadb'
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  Fragment
+} from 'react'
 import ReactGA from 'react-ga'
 import { format } from 'timeago.js'
 import {
@@ -11,25 +17,18 @@ import {
   ModalBody
 } from 'reactstrap'
 import { RouteComponentProps } from '@reach/router'
-import { logout } from '../auth/authService'
+import { logout } from 'auth'
 import {
+  Note,
   getUserNotes,
   updateNoteContent,
   createEmptyNote,
   deleteNote
-} from './notesService'
+} from 'note'
 
 let timeouts: { [key: string]: number } = {}
 
-type Note = {
-  ref: faunadb.values.Ref
-  ts: number
-  data: {
-    content: string
-  }
-}
-
-const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
+const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
   const [notes, setNotes] = useState<Note[] | null>(null)
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
@@ -180,7 +179,7 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
     )
 
   return (
-    <>
+    <Fragment>
       <div className="notes container-fluid">
         <div className="row">
           <div className="scrollable-y col-md-4 col-lg-3 bg-light p-3">
@@ -302,8 +301,8 @@ const Notes: React.FC<RouteComponentProps> = ({ navigate }) => {
           </div>
         </ModalBody>
       </Modal>
-    </>
+    </Fragment>
   )
 }
 
-export default Notes
+export default NotesPage

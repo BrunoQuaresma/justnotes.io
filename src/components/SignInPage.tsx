@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react'
 import { RouteComponentProps, Link } from '@reach/router'
 import ReactGA from 'react-ga'
-import useForm from '../utils/useForm'
-import { signIn } from './authService'
+import useForm from 'hooks/useForm'
+import { signIn } from 'auth'
 
 type SignInValues = {
   email: string
@@ -14,7 +14,7 @@ const initialFormValues = {
   password: ''
 }
 
-const SignIn: React.FC<RouteComponentProps> = ({ navigate }) => {
+const SignInPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   const [isLoading, setIsLoading] = useState(false)
   const { handleSubmit, fieldProps } = useForm<SignInValues>(initialFormValues)
 
@@ -107,4 +107,4 @@ const SignIn: React.FC<RouteComponentProps> = ({ navigate }) => {
   )
 }
 
-export default SignIn
+export default SignInPage

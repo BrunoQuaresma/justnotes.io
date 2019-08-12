@@ -1,17 +1,47 @@
 import faunadb, { query as q } from 'faunadb'
-import cookies from 'js-cookie'
-
-const client = new faunadb.Client({
-  secret: String(process.env.REACT_APP_FAUNADB_AUTH_KEY)
-})
 
 type Credentials = {
   email: string
   password: string
 }
 
+export type AuthSession = {
+  id: string
+  secret: string
+}
+
+type AuthStorage = {
+  set: (key: string, value: any) => void
+  remove: (key: string) => void
+  getJSON: <T>(key: string) => T
+}
+
+type AuthConfig = {
+  client: faunadb.Client
+  storage: AuthStorage
+  event: {
+    emit: (eventName: string, value: any) => void
+  }
+}
+
+export const events = {
+  startSession: 'start_session'
+}
+
+let config: AuthConfig
+
+export const configure = (newConfig: AuthConfig) => {
+  config = newConfig
+
+  const existentSession = getSession()
+
+  if (existentSession) {
+    config.event.emit(events.startSession, existentSession)
+  }
+}
+
 export const signUp = async ({ email, password }: Credentials) => {
-  const session: any = await client.query(
+  const session: any = await config.client.query(
     q.Let(
       {
         user: q.Create(q.Collection('Users'), {
@@ -33,7 +63,7 @@ export const signUp = async ({ email, password }: Credentials) => {
 }
 
 export const signIn = async ({ email, password }: Credentials) => {
-  const session: any = await client.query(
+  const session: any = await config.client.query(
     q.Let(
       {
         token: q.Login(q.Match(q.Index('user_by_email'), [email]), { password })
@@ -50,19 +80,15 @@ export const signIn = async ({ email, password }: Credentials) => {
   return session
 }
 
-type AuthSession = {
-  id: string
-  secret: string
-}
-
 export const setSession = (session: AuthSession) => {
-  cookies.set('session', session)
+  config.storage.set('session', session)
+  config.event.emit(events.startSession, session)
 }
 
 export const getSession = (): AuthSession | undefined => {
-  return cookies.getJSON('session')
+  return config.storage.getJSON('session')
 }
 
 export const logout = () => {
-  cookies.remove('session')
+  config.storage.remove('session')
 }
