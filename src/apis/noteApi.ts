@@ -8,7 +8,7 @@ export type NoteData = {
   content: string
 }
 
-export type Note = {
+export type NoteDocument = {
   ref: faunadb.values.Ref
   ts: number
   data: NoteData
@@ -25,7 +25,7 @@ export const configure = (newConfig: NoteConfig) => {
 }
 
 export const getAllNotes = async () => {
-  const result: Page<Note> = (await config.client.query(
+  const result: Page<NoteDocument> = (await config.client.query(
     q.Map(q.Paginate(q.Match(q.Index('notes_by_owner'), [q.Identity()])), ref =>
       q.Get(ref)
     )
@@ -35,7 +35,7 @@ export const getAllNotes = async () => {
 }
 
 export const updateNoteById = async (noteId: string, data: NoteData) => {
-  const updatedNote: Note = (await config.client.query(
+  const updatedNote: NoteDocument = (await config.client.query(
     q.Update(q.Ref(q.Collection('Notes'), noteId), { data })
   )) as any
 
@@ -43,7 +43,7 @@ export const updateNoteById = async (noteId: string, data: NoteData) => {
 }
 
 export const createNote = async (data: NoteData) => {
-  const newNote: Note = (await config.client.query(
+  const newNote: NoteDocument = (await config.client.query(
     q.Create(q.Collection('Notes'), {
       data: { owner: q.Identity(), ...data }
     })
@@ -53,7 +53,7 @@ export const createNote = async (data: NoteData) => {
 }
 
 export const deleteNoteById = async (noteId: string) => {
-  const deletedNote: Note = (await config.client.query(
+  const deletedNote: NoteDocument = (await config.client.query(
     q.Delete(q.Ref(q.Collection('Notes'), noteId))
   )) as any
 

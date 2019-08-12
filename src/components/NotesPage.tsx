@@ -20,14 +20,14 @@ import {
 } from 'reactstrap'
 import { RouteComponentProps } from '@reach/router'
 import { logout } from 'auth'
-import { Note } from 'apis/noteApi'
 import {
   selectNotes,
   selectLoadingState,
   fetchNotes,
   updateNoteById,
   createNote,
-  deleteNoteById
+  deleteNoteById,
+  NoteItem
 } from 'stores/noteStore'
 import { ThunkDispatch } from 'redux-thunk'
 
@@ -35,7 +35,7 @@ let timeouts: { [key: string]: number } = {}
 
 const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   const dispatch = useDispatch<ThunkDispatch<any, any, PayloadAction>>()
-  const notes: Note[] = useSelector(selectNotes)
+  const notes: NoteItem[] = useSelector(selectNotes)
   const loadingState = useSelector(selectLoadingState)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
@@ -55,9 +55,9 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   }, [])
 
   const handleNoteClick = useCallback(
-    (note: Note) => {
-      setSelectedNoteId(note.ref.id)
-      setTextareavalue(note.data.content)
+    (note: NoteItem) => {
+      setSelectedNoteId(note.id)
+      setTextareavalue(note.content)
       focusTextarea()
     },
     [focusTextarea]
@@ -92,8 +92,8 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
       action: 'Create'
     })
 
-    setSelectedNoteId(newNote.ref.id)
-    setTextareavalue(newNote.data.content)
+    setSelectedNoteId(newNote.id)
+    setTextareavalue(newNote.content)
     focusTextarea()
   }, [dispatch, focusTextarea])
 
@@ -106,9 +106,9 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   }, [isDeleteModalOpen])
 
   const handleNoteDelete = useCallback(
-    async (note: Note, event: React.MouseEvent) => {
+    async (note: NoteItem, event: React.MouseEvent) => {
       event.stopPropagation()
-      setNoteIdToDelete(note.ref.id)
+      setNoteIdToDelete(note.id)
       handleDeleteModalToggle()
     },
     [handleDeleteModalToggle]
@@ -161,9 +161,9 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
             {notes.map(note => (
               <div
                 onClick={() => handleNoteClick(note)}
-                className={`note card mb-1 ${note.ref.id === selectedNoteId &&
+                className={`note card mb-1 ${note.id === selectedNoteId &&
                   'note--active'}`}
-                key={note.ref.id}
+                key={note.id}
               >
                 <div className="card-body">
                   <div className="note__options">
@@ -188,7 +188,7 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
                   </div>
 
                   <p className="note__content">
-                    {note.data.content || (
+                    {note.content || (
                       <span className="text-muted">No content</span>
                     )}
                   </p>

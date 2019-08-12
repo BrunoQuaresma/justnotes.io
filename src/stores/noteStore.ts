@@ -2,11 +2,17 @@ import { createSlice, PayloadAction, createSelector } from 'redux-starter-kit'
 import { Dispatch } from 'react'
 import * as noteApi from 'apis/noteApi'
 
+export type NoteItem = {
+  id: string
+  ts: number
+  content: string
+}
+
 type NoteState = {
   error?: Error
   updatingNoteId?: string
   deletingNoteId?: string
-  items: noteApi.Note[]
+  items: NoteItem[]
   isLoading: boolean
   isCreating: boolean
   isUpdating: boolean
@@ -58,7 +64,7 @@ const noteSlice = createSlice({
       state.isUpdating = false
       state.updatingNoteId = undefined
       state.items = state.items.map(item => {
-        if (item.ref.id === action.payload.note.ref.id) {
+        if (item.id === action.payload.note.id) {
           return action.payload.note
         }
 
@@ -78,7 +84,7 @@ const noteSlice = createSlice({
       state.isDeleting = false
       state.deletingNoteId = undefined
       state.items = state.items.filter(
-        item => item.ref.id !== action.payload.note.ref.id
+        item => item.id !== action.payload.note.id
       )
     },
     deleteNoteError: (state, action) => {
@@ -93,22 +99,35 @@ const { actions, reducer } = noteSlice
 
 /* Actions */
 
-export const fetchNotes = () => async (dispatch: Dispatch<PayloadAction>) => {
+export const fetchNotes = () => async (
+  dispatch: Dispatch<PayloadAction>
+): Promise<NoteItem[] | undefined> => {
   dispatch(actions.fetchNotesStart())
 
   try {
-    const notes = await noteApi.getAllNotes()
-    return dispatch(actions.fetchNotesSuccess({ notes }))
+    const noteDocuments = await noteApi.getAllNotes()
+    const notes = noteDocuments.map(noteDocumentToItem)
+    dispatch(
+      actions.fetchNotesSuccess({
+        notes
+      })
+    )
+    return notes
   } catch (error) {
-    return dispatch(actions.fetchNotesError({ error }))
+    dispatch(actions.fetchNotesError({ error }))
   }
 }
 
-export const createNote = () => async (dispatch: Dispatch<PayloadAction>) => {
+export const createNote = () => async (
+  dispatch: Dispatch<PayloadAction>
+): Promise<NoteItem | undefined> => {
   dispatch(actions.createNoteStart())
 
   try {
-    const note = await noteApi.createNote({ content: '' })
+    const noteDocument = await noteApi.createNote({
+      content: ''
+    })
+    const note = noteDocumentToItem(noteDocument)
     dispatch(actions.createNoteSuccess({ note }))
     return note
   } catch (error) {
@@ -119,24 +138,29 @@ export const createNote = () => async (dispatch: Dispatch<PayloadAction>) => {
 export const updateNoteById = (
   noteId: string,
   data: noteApi.NoteData
-) => async (dispatch: Dispatch<PayloadAction>) => {
+) => async (
+  dispatch: Dispatch<PayloadAction>
+): Promise<NoteItem | undefined> => {
   dispatch(actions.updateNoteStart({ noteId }))
 
   try {
-    const updatedNote = await noteApi.updateNoteById(noteId, data)
-    return dispatch(actions.updateNoteSuccess({ note: updatedNote }))
+    const updatedNoteDocument = await noteApi.updateNoteById(noteId, data)
+    const updatedNote = noteDocumentToItem(updatedNoteDocument)
+    dispatch(actions.updateNoteSuccess({ note: updatedNote }))
+    return updatedNote
   } catch (error) {
-    return dispatch(actions.updateNoteError({ error }))
+    dispatch(actions.updateNoteError({ error }))
   }
 }
 
 export const deleteNoteById = (noteId: string) => async (
   dispatch: Dispatch<PayloadAction>
-) => {
+): Promise<NoteItem | undefined> => {
   dispatch(actions.deleteNoteStart({ noteId }))
 
   try {
-    const deletedNote = await noteApi.deleteNoteById(noteId)
+    const deletedNoteDocument = await noteApi.deleteNoteById(noteId)
+    const deletedNote = noteDocumentToItem(deletedNoteDocument)
     dispatch(actions.deleteNoteSuccess({ note: deletedNote }))
     return deletedNote
   } catch (error) {
@@ -156,5 +180,15 @@ export const selectLoadingState = createSelector(
     isDeleting: state.isDeleting
   })
 )
+
+/* Utils */
+
+const noteDocumentToItem = (document: noteApi.NoteDocument): NoteItem => {
+  return {
+    id: document.ref.id,
+    ts: document.ts,
+    content: document.data.content
+  }
+}
 
 export default reducer
