@@ -3,13 +3,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { PayloadAction } from 'redux-starter-kit'
 import ReactGA from 'react-ga'
 import { Modal, ModalBody } from 'reactstrap'
-import { selectLoadingState, deleteNoteById } from 'stores/noteStore'
+import { selectNoteLoadingState, deleteNoteById } from 'stores/noteStore'
 import { selectBoard, clearDelete, unselectNote } from 'stores/boardStore'
 import { ThunkDispatch } from 'redux-thunk'
 
 const NotesPage: React.FC = () => {
   const dispatch = useDispatch<ThunkDispatch<any, any, PayloadAction>>()
-  const loadingState = useSelector(selectLoadingState)
+  const noteLoadingState = useSelector(selectNoteLoadingState)
   const boardState = useSelector(selectBoard)
 
   const handleNoteDeleteCancel = useCallback(() => {
@@ -43,9 +43,9 @@ const NotesPage: React.FC = () => {
             <button
               onClick={handleDeleteModalConfirm}
               className="btn btn-outline-danger ml-1"
-              disabled={loadingState.isDeleting}
+              disabled={noteLoadingState.isDeleting}
             >
-              {loadingState.isDeleting ? 'Deleting...' : 'Delete note'}
+              {noteLoadingState.isDeleting ? 'Deleting...' : 'Delete note'}
             </button>
           </div>
         </div>

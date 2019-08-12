@@ -172,7 +172,7 @@ export const deleteNoteById = (noteId: string) => async (
 
 export const selectNotes = createSelector(['notes.items'])
 
-export const selectLoadingState = createSelector(
+export const selectNoteLoadingState = createSelector(
   ['notes'],
   state => ({
     isLoading: state.isLoading,
