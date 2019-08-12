@@ -18,7 +18,7 @@ import {
 } from 'reactstrap'
 import { RouteComponentProps } from '@reach/router'
 import { logout } from 'auth'
-import { Note, getUserNotes, updateNote, createNote, deleteNote } from 'note'
+import { Note, getAll, updateNote, createNote, deleteNote } from 'note'
 
 let timeouts: { [key: string]: number } = {}
 
@@ -47,7 +47,7 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   }, [notes])
 
   useEffect(() => {
-    getUserNotes().then(setNotes)
+    getAll().then(setNotes)
   }, [])
 
   const focusTextarea = useCallback(() => {
