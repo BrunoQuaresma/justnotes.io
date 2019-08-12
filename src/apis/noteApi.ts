@@ -4,23 +4,23 @@ type Page<T> = {
   data: T[]
 }
 
-export type NoteData = {
+type NoteDocumentData = {
   content: string
 }
 
 export type NoteDocument = {
   ref: faunadb.values.Ref
   ts: number
-  data: NoteData
+  data: NoteDocumentData
 }
 
-type NoteConfig = {
+type NoteApiConfig = {
   client: faunadb.Client
 }
 
-let config: NoteConfig
+let config: NoteApiConfig
 
-export const configure = (newConfig: NoteConfig) => {
+export const configure = (newConfig: NoteApiConfig) => {
   config = newConfig
 }
 
@@ -34,7 +34,10 @@ export const getAllNotes = async () => {
   return result.data
 }
 
-export const updateNoteById = async (noteId: string, data: NoteData) => {
+export const updateNoteById = async (
+  noteId: string,
+  data: NoteDocumentData
+) => {
   const updatedNote: NoteDocument = (await config.client.query(
     q.Update(q.Ref(q.Collection('Notes'), noteId), { data })
   )) as any
@@ -42,7 +45,7 @@ export const updateNoteById = async (noteId: string, data: NoteData) => {
   return updatedNote
 }
 
-export const createNote = async (data: NoteData) => {
+export const createNote = async (data: NoteDocumentData) => {
   const newNote: NoteDocument = (await config.client.query(
     q.Create(q.Collection('Notes'), {
       data: { owner: q.Identity(), ...data }
