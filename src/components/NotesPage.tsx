@@ -26,7 +26,7 @@ const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
 
   return (
     <Fragment>
-      <div className="notes container-fluid">
+      <div className="board container-fluid">
         <div className="row">
           <BoardSidebar></BoardSidebar>
 
