@@ -7,7 +7,8 @@ import { updateContent, selectBoard } from 'stores/boardStore'
 import { ThunkDispatch } from 'redux-thunk'
 import NewNoteButton from 'components/NewNoteButton'
 
-let timeouts: { [key: string]: number } = {}
+const DEBOUNCE_TIMEOUT = 1000
+let debounceTimeouts: { [key: string]: number } = {}
 
 const BoardContent: React.FC = () => {
   const dispatch = useDispatch<ThunkDispatch<any, any, PayloadAction>>()
@@ -18,17 +19,18 @@ const BoardContent: React.FC = () => {
   const handleTextChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newContent = event.currentTarget.value
+      const { selectedNoteId } = boardState
+
       dispatch(updateContent(newContent))
 
-      const { selectedNoteId } = boardState
-      window.clearInterval(timeouts[selectedNoteId])
-      timeouts[selectedNoteId] = window.setTimeout(() => {
+      window.clearInterval(debounceTimeouts[selectedNoteId])
+      debounceTimeouts[selectedNoteId] = window.setTimeout(() => {
         dispatch(updateNoteById(selectedNoteId, { content: newContent }))
         ReactGA.event({
           category: 'Note',
           action: 'Update'
         })
-      }, 1000)
+      }, DEBOUNCE_TIMEOUT)
     },
     [boardState, dispatch]
   )
