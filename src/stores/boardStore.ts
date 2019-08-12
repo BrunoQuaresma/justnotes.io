@@ -32,7 +32,7 @@ const boardSlice = createSlice({
     clearDelete: state => {
       state.noteIdToDelete = undefined
     },
-    clearSelect: state => {
+    unselectNote: state => {
       state.selectedNoteId = undefined
     }
   }
@@ -48,6 +48,6 @@ export const {
   updateContent,
   selectNoteToDelete,
   clearDelete,
-  clearSelect
+  unselectNote
 } = actions
 export default reducer
