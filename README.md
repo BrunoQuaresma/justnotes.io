@@ -9,7 +9,9 @@ If you have questions or suggestions you can open an issue and I'll try to answe
 
 ## Techstack
 - [FaunaDB](https://fauna.com/)
-- [React](https://reactjs.org/)
+- [Create React App](https://facebook.github.io/create-react-app/)
+- [Redux Starter Kit](https://redux-starter-kit.js.org/)
+- [React Redux](https://react-redux.js.org/)
 - [Typescript](https://www.typescriptlang.org/)
 
 ## Before start
