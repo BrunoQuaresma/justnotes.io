@@ -18,7 +18,13 @@ import {
 } from 'reactstrap'
 import { RouteComponentProps } from '@reach/router'
 import { logout } from 'auth'
-import { Note, getAllNotes, updateNote, createNote, deleteNote } from 'note'
+import {
+  Note,
+  getAllNotes,
+  updateNote,
+  createNote,
+  deleteNote
+} from 'apis/noteApi'
 
 let timeouts: { [key: string]: number } = {}
 

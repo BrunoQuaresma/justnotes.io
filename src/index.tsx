@@ -7,7 +7,7 @@ import App from 'components/App'
 import * as serviceWorker from 'serviceWorker'
 import * as auth from 'auth'
 import * as event from 'event'
-import * as note from 'note'
+import * as noteApi from 'apis/noteApi'
 
 const { REACT_APP_GA_ID, REACT_APP_FAUNADB_AUTH_KEY } = process.env
 
@@ -16,7 +16,7 @@ if (REACT_APP_GA_ID) ReactGA.initialize(REACT_APP_GA_ID)
 
 // Configure note
 event.on(auth.events.startSession, (session: auth.AuthSession) => {
-  note.configure({
+  noteApi.configure({
     client: new faunadb.Client({ secret: session.secret })
   })
 })
