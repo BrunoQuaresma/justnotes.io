@@ -1,21 +1,28 @@
-import React, { useEffect, Fragment } from 'react'
+import React, { useEffect, Fragment, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { PayloadAction } from 'redux-starter-kit'
 import { RouteComponentProps } from '@reach/router'
+import { ThunkDispatch } from 'redux-thunk'
 import { selectLoadingState, fetchNotes } from 'stores/noteStore'
 import BoardSidebar from 'components/BoardSidebar'
 import BoardContent from 'components/BoardContent'
 import BoardHeader from 'components/BoardHeader'
 import NoteDeleteModal from 'components/NoteDeleteModal'
-import { ThunkDispatch } from 'redux-thunk'
+import { getSession } from 'auth'
 
 const NotesPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   const dispatch = useDispatch<ThunkDispatch<any, any, PayloadAction>>()
   const loadingState = useSelector(selectLoadingState)
+  const session = useMemo(() => getSession(), [])
 
   useEffect(() => {
+    if (!session) {
+      navigate && navigate('/')
+      return
+    }
+
     dispatch(fetchNotes())
-  }, [dispatch])
+  }, [dispatch, navigate, session])
 
   if (loadingState.isLoading)
     return (
