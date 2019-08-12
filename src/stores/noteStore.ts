@@ -137,7 +137,7 @@ export const createNote = () => async (
 
 export const updateNoteById = (
   noteId: string,
-  data: noteApi.NoteData
+  data: noteApi.NoteDocumentData
 ) => async (
   dispatch: Dispatch<PayloadAction>
 ): Promise<NoteItem | undefined> => {

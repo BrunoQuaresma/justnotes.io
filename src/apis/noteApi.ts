@@ -4,7 +4,7 @@ type Page<T> = {
   data: T[]
 }
 
-type NoteDocumentData = {
+export type NoteDocumentData = {
   content: string
 }
 
