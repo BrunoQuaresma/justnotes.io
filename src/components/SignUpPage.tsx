@@ -18,19 +18,26 @@ const initialFormValues = {
 
 const SignUpPage: React.FC<RouteComponentProps> = ({ navigate }) => {
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string>()
   const { handleSubmit, fieldProps } = useForm<SignUpValues>(initialFormValues)
 
   const registerUser = useCallback(
     async (values: SignUpValues) => {
       setIsLoading(true)
+      setError(undefined)
 
-      await signUp(values)
+      try {
+        await signUp(values)
 
-      ReactGA.event({
-        category: 'User',
-        action: 'Sign Up'
-      })
-      navigate && navigate('/notes')
+        ReactGA.event({
+          category: 'User',
+          action: 'Sign Up'
+        })
+        navigate && navigate('/notes')
+      } catch (error) {
+        setIsLoading(false)
+        setError(error.message)
+      }
     },
     [navigate]
   )
@@ -95,6 +102,7 @@ const SignUpPage: React.FC<RouteComponentProps> = ({ navigate }) => {
               <Link to="/" className="btn btn-light btn-block">
                 Login
               </Link>
+              {error && <p className="text-danger text-center p-3">{error}</p>}
             </div>
           </form>
         </div>
