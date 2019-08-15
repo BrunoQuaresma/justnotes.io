@@ -1,4 +1,5 @@
 import faunadb, { query as q } from 'faunadb'
+import { encrypt } from 'crypt'
 
 type Page<T> = {
   data: T[]
@@ -62,3 +63,36 @@ export const deleteNoteById = async (noteId: string) => {
 
   return deletedNote
 }
+
+export const encryptNotes = async (secret: string) => {
+  const noteDocuments = await getAllNotes()
+  const encryptedNoteDocuments = noteDocuments.map(noteDocument =>
+    encryptNoteDocument(noteDocument, secret)
+  )
+  const updateNotesQuery = encryptedNoteDocuments.map(noteDocument =>
+    q.Update(noteDocument.ref, { data: noteDocument.data })
+  )
+
+  await config.client.query(
+    q.Do(
+      updateNotesQuery,
+      q.Update(q.Identity(), {
+        data: {
+          preferences: {
+            encrypted: true
+          }
+        }
+      })
+    )
+  )
+
+  return encryptedNoteDocuments
+}
+
+const encryptNoteDocument = (noteDocument: NoteDocument, secret: string) => ({
+  ...noteDocument,
+  data: {
+    ...noteDocument.data,
+    content: encrypt(noteDocument.data.content, secret)
+  }
+})

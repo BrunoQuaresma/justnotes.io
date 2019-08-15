@@ -63,7 +63,8 @@ export const fetchProfile = () => async (
 
 /* Selectors */
 
-export const selectProfile = createSelector(['profile'])
+export const selectProfile = createSelector(['profile.data'])
+export const selectPreferences = createSelector(['profile.data.preferences'])
 export const selectProfileLoading = createSelector(['profile.isLoadnig'])
 
 export default reducer

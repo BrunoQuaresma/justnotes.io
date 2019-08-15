@@ -1,16 +1,19 @@
-import { createSlice, createSelector } from 'redux-starter-kit'
-import { NoteItem } from 'stores/noteStore'
+import { createSlice, createSelector, PayloadAction } from 'redux-starter-kit'
+import { NoteItem, decryptNotes } from 'stores/noteStore'
+import { ThunkDispatch } from 'redux-thunk'
 
 type BoardState = {
   content: string
   selectedNoteId?: string
   noteIdToDelete?: string
+  cryptoSecret?: string
 }
 
 const initialState: BoardState = {
   content: '',
   selectedNoteId: undefined,
-  noteIdToDelete: undefined
+  noteIdToDelete: undefined,
+  cryptoSecret: undefined
 }
 
 const boardSlice = createSlice({
@@ -34,13 +37,29 @@ const boardSlice = createSlice({
     },
     unselectNote: state => {
       state.selectedNoteId = undefined
+    },
+    saveCryptoSecret: (state, action) => {
+      state.cryptoSecret = action.payload
+    },
+    unsetCryptoSecret: state => {
+      state.cryptoSecret = undefined
     }
   }
 })
 
+/* Actions */
+
+export const setCryptoSecret = (cryptoSecret: string) => (
+  dispatch: ThunkDispatch<any, any, PayloadAction>
+) => {
+  dispatch(actions.saveCryptoSecret(cryptoSecret))
+  dispatch(decryptNotes())
+}
+
 /* Selectors */
 
 export const selectBoard = createSelector(['board'])
+export const selectCryptoSecret = createSelector(['board.cryptoSecret'])
 
 const { actions, reducer } = boardSlice
 export const {
@@ -48,6 +67,7 @@ export const {
   updateContent,
   selectNoteToDelete,
   clearDelete,
-  unselectNote
+  unselectNote,
+  unsetCryptoSecret
 } = actions
 export default reducer

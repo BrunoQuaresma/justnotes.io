@@ -19,6 +19,7 @@ const useForm = <FormValues extends HashMap>(initialValues: FormValues) => {
     return {
       name,
       onChange,
+      id: name,
       value: values && values[name]
     }
   }

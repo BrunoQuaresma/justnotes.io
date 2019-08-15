@@ -1,6 +1,9 @@
 import { createSlice, PayloadAction, createSelector } from 'redux-starter-kit'
 import { Dispatch } from 'react'
 import * as noteApi from 'apis/noteApi'
+import { decrypt, encrypt } from 'crypt'
+import { selectPreferences } from './profileStore'
+import { selectCryptoSecret } from './boardStore'
 
 export type NoteItem = {
   id: string
@@ -17,6 +20,7 @@ type NoteState = {
   isCreating: boolean
   isUpdating: boolean
   isDeleting: boolean
+  isEncrypting: boolean
 }
 
 const initialState: NoteState = {
@@ -27,7 +31,8 @@ const initialState: NoteState = {
   isLoading: false,
   isCreating: false,
   isUpdating: false,
-  isDeleting: false
+  isDeleting: false,
+  isEncrypting: false
 }
 
 const noteSlice = createSlice({
@@ -45,6 +50,7 @@ const noteSlice = createSlice({
       state.isLoading = false
       state.error = action.payload.error
     },
+
     createNoteStart: state => {
       state.isCreating = true
     },
@@ -56,6 +62,7 @@ const noteSlice = createSlice({
       state.isCreating = false
       state.error = action.payload.error
     },
+
     updateNoteStart: (state, action) => {
       state.isUpdating = true
       state.updatingNoteId = action.payload.noteId
@@ -76,6 +83,7 @@ const noteSlice = createSlice({
       state.updatingNoteId = undefined
       state.error = action.payload.error
     },
+
     deleteNoteStart: (state, action) => {
       state.isDeleting = true
       state.deletingNoteId = action.payload.noteId
@@ -91,6 +99,22 @@ const noteSlice = createSlice({
       state.isDeleting = false
       state.deletingNoteId = undefined
       state.error = action.payload.error
+    },
+
+    encryptNotesStart: (state, action) => {
+      state.isEncrypting = true
+    },
+    encryptNotesSuccess: (state, action) => {
+      state.isEncrypting = false
+      state.items = action.payload
+    },
+    encryptNotesError: (state, action) => {
+      state.isEncrypting = false
+      state.error = action.payload.error
+    },
+
+    replaceNotes: (state, action) => {
+      state.items = action.payload
     }
   }
 })
@@ -100,13 +124,23 @@ const { actions, reducer } = noteSlice
 /* Actions */
 
 export const fetchNotes = () => async (
-  dispatch: Dispatch<PayloadAction>
+  dispatch: Dispatch<PayloadAction>,
+  getState: () => any
 ): Promise<NoteItem[] | undefined> => {
+  const state = getState()
+
   dispatch(actions.fetchNotesStart())
 
   try {
     const noteDocuments = await noteApi.getAllNotes()
-    const notes = noteDocuments.map(noteDocumentToItem)
+    const preferences = selectPreferences(state)
+    const cryptoSecret = selectCryptoSecret(state)
+    let notes = noteDocuments.map(noteDocumentToItem)
+
+    if (preferences && preferences.encrypted) {
+      notes = notes.map(desencryptNoteItem(cryptoSecret))
+    }
+
     dispatch(
       actions.fetchNotesSuccess({
         notes
@@ -139,15 +173,28 @@ export const updateNoteById = (
   noteId: string,
   data: noteApi.NoteDocumentData
 ) => async (
-  dispatch: Dispatch<PayloadAction>
+  dispatch: Dispatch<PayloadAction>,
+  getState: () => any
 ): Promise<NoteItem | undefined> => {
+  const state = getState()
+
   dispatch(actions.updateNoteStart({ noteId }))
 
   try {
-    const updatedNoteDocument = await noteApi.updateNoteById(noteId, data)
-    const updatedNote = noteDocumentToItem(updatedNoteDocument)
-    dispatch(actions.updateNoteSuccess({ note: updatedNote }))
-    return updatedNote
+    const preferences = selectPreferences(state)
+    const cryptoSecret = selectCryptoSecret(state)
+    const updatedNoteDocument = await noteApi.updateNoteById(
+      noteId,
+      preferences && preferences.encrypted
+        ? encryptNoteData(cryptoSecret)(data)
+        : data
+    )
+    let updatedNoteItem = noteDocumentToItem(updatedNoteDocument)
+    if (preferences && preferences.encrypted) {
+      updatedNoteItem = desencryptNoteItem(cryptoSecret)(updatedNoteItem)
+    }
+    dispatch(actions.updateNoteSuccess({ note: updatedNoteItem }))
+    return updatedNoteItem
   } catch (error) {
     dispatch(actions.updateNoteError({ error }))
   }
@@ -168,6 +215,38 @@ export const deleteNoteById = (noteId: string) => async (
   }
 }
 
+export const encryptNotes = () => async (
+  dispatch: Dispatch<PayloadAction>,
+  getState: () => any
+): Promise<NoteItem[] | undefined> => {
+  const state = getState()
+
+  dispatch(actions.encryptNotesStart())
+
+  try {
+    const cryptoSecret = selectCryptoSecret(state)
+    const encryptedNoteDocuments = await noteApi.encryptNotes(cryptoSecret)
+    const noteItems = encryptedNoteDocuments
+      .map(noteDocumentToItem)
+      .map(desencryptNoteItem(cryptoSecret))
+    dispatch(actions.encryptNotesSuccess(noteItems))
+    return noteItems
+  } catch (error) {
+    dispatch(actions.encryptNotesError({ error }))
+    throw new Error(`Problem on encrypt notes: ${error.message}`)
+  }
+}
+
+export const decryptNotes = () => (
+  dispatch: Dispatch<PayloadAction>,
+  getState: () => any
+) => {
+  const state = getState()
+  const cryptoSecret = selectCryptoSecret(state)
+  const notes = selectNotes(state)
+  dispatch(actions.replaceNotes(notes.map(desencryptNoteItem(cryptoSecret))))
+}
+
 /* Selectors */
 
 export const selectNotes = createSelector(['notes.items'])
@@ -177,7 +256,8 @@ export const selectNoteLoadingState = createSelector(
   state => ({
     isLoading: state.isLoading,
     isCreating: state.isCreating,
-    isDeleting: state.isDeleting
+    isDeleting: state.isDeleting,
+    isEncrypting: state.isEncrypting
   })
 )
 
@@ -188,6 +268,28 @@ const noteDocumentToItem = (document: noteApi.NoteDocument): NoteItem => {
     id: document.ref.id,
     ts: document.ts,
     content: document.data.content
+  }
+}
+
+const desencryptNoteItem = (cryptoSecret: string) => (
+  noteItem: NoteItem
+): NoteItem => {
+  if (!cryptoSecret) return noteItem
+
+  return {
+    ...noteItem,
+    content: decrypt(noteItem.content, cryptoSecret)
+  }
+}
+
+const encryptNoteData = (cryptoSecret: string) => (
+  data: noteApi.NoteDocumentData
+): noteApi.NoteDocumentData => {
+  if (!cryptoSecret) return data
+
+  return {
+    ...data,
+    content: encrypt(data.content, cryptoSecret)
   }
 }
 
