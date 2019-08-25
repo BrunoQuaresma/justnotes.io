@@ -3,6 +3,7 @@ import { RouteComponentProps, Link } from '@reach/router'
 import ReactGA from 'react-ga'
 import useForm from 'hooks/useForm'
 import { signIn } from 'auth'
+import PublicHeader from 'components/PublicHeader'
 
 type SignInValues = {
   email: string
@@ -42,14 +43,7 @@ const SignInPage: React.FC<RouteComponentProps> = ({ navigate }) => {
 
   return (
     <div className="container h-100">
-      <div className="row py-3 py-lg-5">
-        <div className="col">
-          <span className="lead">
-            <span className="font-weight-bold">justnotes</span>
-            <span className="text-muted">.io</span>
-          </span>
-        </div>
-      </div>
+      <PublicHeader />
 
       <div className="row py-3 py-lg-5">
         <div className="col-lg-8">
